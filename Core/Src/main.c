@@ -55,7 +55,9 @@ uint8_t Length_of_Ext_Var=0;
 
 CAN_TxHeaderTypeDef Tx_Header;
 uint32_t            TxMailbox;
-uint32_t            tmp32u=0x0e0f0a0b;
+uint32_t            tmp32u   = 0x0e0f0a0b;
+uint64_t            tmp64u_0 = 0x0e1f1a1b56789a;
+uint64_t            tmp64u_1 = 0x0e1f1a1b56789a;
 uint32_t            Ticks;
 char String_0[]={"String_for_Test_UART"};
 
@@ -278,7 +280,7 @@ int main(void)
   canOpenNodeSTM32.CANHandle = &hcan;
   canOpenNodeSTM32.HWInitFunction = MX_CAN_Init;
   canOpenNodeSTM32.timerHandle = &htim17;
-  canOpenNodeSTM32.desiredNodeID = 72;
+  canOpenNodeSTM32.desiredNodeID = 24;			///72;
   canOpenNodeSTM32.baudrate = 125*4;
   canopen_app_init(&canOpenNodeSTM32);
   /* USER CODE END 2 */
@@ -335,22 +337,33 @@ int main(void)
 	  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5  , canOpenNodeSTM32.outStatusLEDGreen);//включение
 	  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13 ,!canOpenNodeSTM32.outStatusLEDRed  );//включение с инверсией
 
-
 	canopen_app_process();
-	if(tmp32u != OD_PERSIST_COMM.x6001_nucleo_RX_6001)
-		{
-		tmp32u = OD_PERSIST_COMM.x6001_nucleo_RX_6001;
-		huart2.gState = HAL_UART_STATE_READY;
+
+//	if(tmp32u != OD_PERSIST_COMM.x6001_nucleo_TX_6001)
+//		{
+//		tmp32u = OD_PERSIST_COMM.x6001_nucleo_TX_6001;
+//		huart2.gState = HAL_UART_STATE_READY;
 //		HAL_UART_Transmit_DMA( &huart2, (uint8_t*)(&tmp32u), 4);
-		HAL_UART_Transmit_DMA( &huart2, (uint8_t*)( Ticks ), 4);
-		}
+//		HAL_UART_Transmit_DMA( &huart2, (uint8_t*)( Ticks ), 4);
+//		}
 
 
-
-	  if(HAL_GetTick() - Ticks>2000)
+	  if(HAL_GetTick() - Ticks>850)
 	  {
-		OD_PERSIST_COMM.x6002_nucleo_TX_6002++;
+		OD_PERSIST_COMM.x6000_nucleo_TX_6000++;
+		tmp64u_1 = OD_PERSIST_COMM.x6000_nucleo_TX_6000;
+
+		OD_set_f64(
+					OD_find(OD, 0x6000),
+					0,
+					tmp64u_1,
+					0);
+
+		CO_TPDOsendRequest(canOpenNodeSTM32.canOpenStack->TPDO );
+
 		Ticks = HAL_GetTick();
+		huart2.gState = HAL_UART_STATE_READY;
+		HAL_UART_Transmit_DMA( &huart2, (uint8_t*)( &tmp64u_1 ), 8);
 	  }
 
 

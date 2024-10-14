@@ -23,24 +23,36 @@
 #if ((CO_CONFIG_LEDS)&CO_CONFIG_LEDS_ENABLE) != 0
 
 CO_ReturnError_t
-CO_LEDs_init(CO_LEDs_t* LEDs) {
+CO_LEDs_init(CO_LEDs_t* LEDs)
+{
     CO_ReturnError_t ret = CO_ERROR_NO;
 
     /* verify arguments */
-    if (LEDs == NULL) {
-        return CO_ERROR_ILLEGAL_ARGUMENT;
-    }
+    if (LEDs == NULL) {return CO_ERROR_ILLEGAL_ARGUMENT;}
 
     /* clear the object */
     (void)memset(LEDs, 0, sizeof(CO_LEDs_t));
-
     return ret;
 }
 
+
+
 void
-CO_LEDs_process(CO_LEDs_t* LEDs, uint32_t timeDifference_us, CO_NMT_internalState_t NMTstate, bool_t LSSconfig,
-                bool_t ErrCANbusOff, bool_t ErrCANbusWarn, bool_t ErrRpdo, bool_t ErrSync, bool_t ErrHbCons,
-                bool_t ErrOther, bool_t firmwareDownload, uint32_t* timerNext_us) {
+CO_LEDs_process(
+				CO_LEDs_t* LEDs,
+				uint32_t timeDifference_us,
+				CO_NMT_internalState_t NMTstate,
+				bool_t LSSconfig,
+                bool_t ErrCANbusOff,
+				bool_t ErrCANbusWarn,
+				bool_t ErrRpdo,
+				bool_t ErrSync,
+				bool_t ErrHbCons,
+                bool_t ErrOther,
+				bool_t firmwareDownload,
+				uint32_t* timerNext_us
+			   )
+{
     (void)timerNext_us; /* may be unused */
 
     uint8_t rd = 0;
@@ -48,13 +60,15 @@ CO_LEDs_process(CO_LEDs_t* LEDs, uint32_t timeDifference_us, CO_NMT_internalStat
     bool_t tick = false;
 
     LEDs->LEDtmr50ms += timeDifference_us;
-    while (LEDs->LEDtmr50ms >= 50000U) {
+    while (LEDs->LEDtmr50ms >= 50000U)
+    {
         bool_t rdFlickerNext = (LEDs->LEDred & (uint8_t)CO_LED_flicker) == 0U;
 
         tick = true;
         LEDs->LEDtmr50ms -= 50000U;
 
-        if (++LEDs->LEDtmr200ms > 3U) {
+        if (++LEDs->LEDtmr200ms > 3U)
+        {
             /* calculate 2,5Hz blinking and flashing */
             LEDs->LEDtmr200ms = 0;
             rd = 0;
@@ -66,13 +80,17 @@ CO_LEDs_process(CO_LEDs_t* LEDs, uint32_t timeDifference_us, CO_NMT_internalStat
                 gr |= CO_LED_blink;
             }
 
-            switch (++LEDs->LEDtmrflash_1) {
+            switch (++LEDs->LEDtmrflash_1)
+            {
                 case 1: rd |= CO_LED_flash_1; break;
                 case 2: gr |= CO_LED_flash_1; break;
                 case 6: LEDs->LEDtmrflash_1 = 0; break;
                 default: /* none */ break;
             }
-            switch (++LEDs->LEDtmrflash_2) {
+
+
+            switch (++LEDs->LEDtmrflash_2)
+            {
                 case 1:
                 case 3: rd |= CO_LED_flash_2; break;
                 case 2:
@@ -80,7 +98,10 @@ CO_LEDs_process(CO_LEDs_t* LEDs, uint32_t timeDifference_us, CO_NMT_internalStat
                 case 8: LEDs->LEDtmrflash_2 = 0; break;
                 default: /* none */ break;
             }
-            switch (++LEDs->LEDtmrflash_3) {
+
+
+            switch (++LEDs->LEDtmrflash_3)
+            {
                 case 1:
                 case 3:
                 case 5: rd |= CO_LED_flash_3; break;
@@ -90,7 +111,10 @@ CO_LEDs_process(CO_LEDs_t* LEDs, uint32_t timeDifference_us, CO_NMT_internalStat
                 case 10: LEDs->LEDtmrflash_3 = 0; break;
                 default: /* none */ break;
             }
-            switch (++LEDs->LEDtmrflash_4) {
+
+
+            switch (++LEDs->LEDtmrflash_4)
+            {
                 case 1:
                 case 3:
                 case 5:
@@ -102,20 +126,26 @@ CO_LEDs_process(CO_LEDs_t* LEDs, uint32_t timeDifference_us, CO_NMT_internalStat
                 case 12: LEDs->LEDtmrflash_4 = 0; break;
                 default: /* none */ break;
             }
-        } else {
-            /* clear flicker and CANopen bits, keep others */
-            rd = LEDs->LEDred & (0xFFU ^ (CO_LED_flicker | CO_LED_CANopen));
-            gr = LEDs->LEDgreen & (0xFFU ^ (CO_LED_flicker | CO_LED_CANopen));
-        }
+
+
+        } else 	{
+					/* clear flicker and CANopen bits, keep others */
+					rd = LEDs->LEDred & (0xFFU ^ (CO_LED_flicker | CO_LED_CANopen));
+					gr = LEDs->LEDgreen & (0xFFU ^ (CO_LED_flicker | CO_LED_CANopen));
+				}
+
 
         /* calculate 10Hz flickering */
-        if (rdFlickerNext) {
+        if (rdFlickerNext)
+        {
             rd |= CO_LED_flicker;
-        } else {
-            gr |= CO_LED_flicker;
-        }
+        } else 	{
+            	gr |= CO_LED_flicker;
+        		}
 
     } /* while (LEDs->LEDtmr50ms >= 50000) */
+
+
 
     if (tick) {
         uint8_t rd_co, gr_co;

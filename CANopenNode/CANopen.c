@@ -1314,68 +1314,90 @@ CO_process(	CO_t* co,
 			uint32_t* timerNext_us )
 {
     (void)enableGateway; /* may be unused */
-    CO_NMT_reset_cmd_t reset = CO_RESET_NOT;
-    CO_NMT_internalState_t NMTstate = CO_NMT_getInternalState(co->NMT);
-    bool_t NMTisPreOrOperational = ((NMTstate == CO_NMT_PRE_OPERATIONAL) || (NMTstate == CO_NMT_OPERATIONAL));
+    CO_NMT_reset_cmd_t 		reset 	= CO_RESET_NOT;
+    CO_NMT_internalState_t 	NMTstate = CO_NMT_getInternalState(co->NMT);
+    bool_t 					NMTisPreOrOperational = ((NMTstate == CO_NMT_PRE_OPERATIONAL) || (NMTstate == CO_NMT_OPERATIONAL));
 
     /* CAN module */
     CO_CANmodule_process(co->CANmodule);
 
 #if ((CO_CONFIG_LSS)&CO_CONFIG_LSS_SLAVE)
-    if (CO_GET_CNT(LSS_SLV) == 1U) {
-        if (CO_LSSslave_process(co->LSSslave)) {
-            reset = CO_RESET_COMM;
-        }
-    }
+
+    if (CO_GET_CNT(LSS_SLV) == 1U)
+    {
+      if (CO_LSSslave_process(co->LSSslave)) { reset = CO_RESET_COMM; }
+	}
+
 #endif
 
-#if ((CO_CONFIG_LEDS)&CO_CONFIG_LEDS_ENABLE) != 0
-    bool_t unc = co->nodeIdUnconfigured;
-    uint16_t CANerrorStatus = co->CANmodule->CANerrorStatus;
-    bool_t LSSslave_configuration = false;
-#if ((CO_CONFIG_LSS)&CO_CONFIG_LSS_SLAVE) != 0
-    if (CO_GET_CNT(LSS_SLV) == 1U) {
-        if (CO_LSSslave_getState(co->LSSslave) == CO_LSS_STATE_CONFIGURATION) {
-            LSSslave_configuration = true;
-        }
-    }
-#endif
-/* default macro, can be defined externally */
-#ifndef CO_STATUS_FIRMWARE_DOWNLOAD_IN_PROGRESS
-#define CO_STATUS_FIRMWARE_DOWNLOAD_IN_PROGRESS false
-#endif
+#if ((CO_CONFIG_LEDS)&CO_CONFIG_LEDS_ENABLE)!= 0
+    bool_t 		unc 			= co->nodeIdUnconfigured;
+    uint16_t 	CANerrorStatus 	= co->CANmodule->CANerrorStatus;
+    bool_t 		LSSslave_configuration = false;
 
-    if (CO_GET_CNT(LEDS) == 1U) {
-        bool_t ErrSync = CO_isError(co->em, CO_EM_SYNC_TIME_OUT);
-        bool_t ErrHbCons = CO_isError(co->em, CO_EM_HEARTBEAT_CONSUMER);
-        bool_t ErrHbConsRemote = CO_isError(co->em, CO_EM_HB_CONSUMER_REMOTE_RESET);
-        CO_LEDs_process(co->LEDs, timeDifference_us, unc ? CO_NMT_INITIALIZING : NMTstate, LSSslave_configuration,
-                        (CANerrorStatus & CO_CAN_ERRTX_BUS_OFF) != 0U, (CANerrorStatus & CO_CAN_ERR_WARN_PASSIVE) != 0U,
-                        false, /* RPDO event timer timeout */
-                        unc ? false : ErrSync, unc ? false : (ErrHbCons || ErrHbConsRemote),
-                        CO_getErrorRegister(co->em) != 0U, CO_STATUS_FIRMWARE_DOWNLOAD_IN_PROGRESS, timerNext_us);
-    }
+	#if ((CO_CONFIG_LSS)&CO_CONFIG_LSS_SLAVE) != 0
+
+		if (CO_GET_CNT(LSS_SLV) == 1U)
+		{
+			if (CO_LSSslave_getState(co->LSSslave) == CO_LSS_STATE_CONFIGURATION)
+					{ LSSslave_configuration = true; }
+		}
+
+	#endif
+
+		/* default macro, can be defined externally */
+		#ifndef CO_STATUS_FIRMWARE_DOWNLOAD_IN_PROGRESS
+		#define CO_STATUS_FIRMWARE_DOWNLOAD_IN_PROGRESS false
+		#endif
+
+		if (CO_GET_CNT(LEDS) == 1U)
+		{
+			bool_t ErrSync 	     	= CO_isError(co->em, CO_EM_SYNC_TIME_OUT);
+			bool_t ErrHbCons 		= CO_isError(co->em, CO_EM_HEARTBEAT_CONSUMER);
+			bool_t ErrHbConsRemote 	= CO_isError(co->em, CO_EM_HB_CONSUMER_REMOTE_RESET);
+			CO_LEDs_process(co->LEDs,
+							timeDifference_us,
+							unc ? CO_NMT_INITIALIZING : NMTstate,
+							LSSslave_configuration,
+							(CANerrorStatus & CO_CAN_ERRTX_BUS_OFF) 	!= 0U,
+							(CANerrorStatus & CO_CAN_ERR_WARN_PASSIVE) 	!= 0U,
+							false, /* RPDO event timer timeout */
+							unc ? false : ErrSync, unc ? false : (ErrHbCons || ErrHbConsRemote),
+							CO_getErrorRegister(co->em) != 0U,
+							CO_STATUS_FIRMWARE_DOWNLOAD_IN_PROGRESS,
+							timerNext_us);
+		}
+
 #endif
 
     /* CANopen Node ID is unconfigured (LSS slave), stop processing here */
-    if (co->nodeIdUnconfigured) {
-        return reset;
-    }
+    if (co->nodeIdUnconfigured) { return reset;}
+
 
     /* Emergency */
-    if (CO_GET_CNT(EM) == 1U) {
-        CO_EM_process(co->em, NMTisPreOrOperational, timeDifference_us, timerNext_us);
+    if (CO_GET_CNT(EM) == 1U)
+    {
+    	CO_EM_process(co->em, NMTisPreOrOperational, timeDifference_us, timerNext_us);
     }
 
+
     /* NMT_Heartbeat */
-    if (CO_GET_CNT(NMT) == 1U) {
+    if (CO_GET_CNT(NMT) == 1U)
+    {
         reset = CO_NMT_process(co->NMT, &NMTstate, timeDifference_us, timerNext_us);
     }
     NMTisPreOrOperational = ((NMTstate == CO_NMT_PRE_OPERATIONAL) || (NMTstate == CO_NMT_OPERATIONAL));
 
+
     /* SDOserver */
-    for (uint8_t i = 0; i < CO_GET_CNT(SDO_SRV); i++) {
-        (void)CO_SDOserver_process(&co->SDOserver[i], NMTisPreOrOperational, timeDifference_us, timerNext_us);
+    for (uint8_t i = 0; i < CO_GET_CNT(SDO_SRV); i++)
+    {
+        (void)CO_SDOserver_process (
+        							&co->SDOserver[i],
+        							NMTisPreOrOperational,
+									timeDifference_us,
+									timerNext_us
+								   );
     }
 
 #if ((CO_CONFIG_HB_CONS)&CO_CONFIG_HB_CONS_ENABLE) != 0

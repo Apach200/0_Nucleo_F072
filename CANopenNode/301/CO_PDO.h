@@ -149,7 +149,8 @@ typedef enum {
 /**
  * PDO object, common properties
  */
-typedef struct {
+typedef struct
+{
     CO_EM_t* em;                /**< From CO_xPDO_init() */
     CO_CANmodule_t* CANdev;     /**< From CO_xPDO_init() */
     bool_t valid;               /**< True, if PDO is enabled and valid */
@@ -285,6 +286,12 @@ void CO_RPDO_process(CO_RPDO_t* RPDO,
                      bool_t NMTisOperational, bool_t syncWas);
 #endif /* (CO_CONFIG_PDO) & CO_CONFIG_RPDO_ENABLE */
 
+
+
+
+
+
+
 /*******************************************************************************
  *      T P D O
  ******************************************************************************/
@@ -292,16 +299,17 @@ void CO_RPDO_process(CO_RPDO_t* RPDO,
 /**
  * TPDO object.
  */
-typedef struct {
-    CO_PDO_common_t PDO_common; /**< PDO common properties, must be first element in this object */
-    CO_CANtx_t* CANtxBuff;      /**< CAN transmit buffer inside CANdev */
-    uint8_t transmissionType;   /**< Copy of the variable from object dictionary */
-    bool_t sendRequest;         /**< If this flag is set and TPDO is event driven (transmission type is 0, 254 or 255),
-                                   then PDO will be sent by CO_TPDO_process(). */
+typedef struct
+{
+    CO_PDO_common_t PDO_common; 		/**< PDO common properties, must be first element in this object */
+    CO_CANtx_t* 	CANtxBuff;      	/**< CAN transmit buffer inside CANdev */
+    uint8_t 		transmissionType;   /**< Copy of the variable from object dictionary */
+    bool_t 			sendRequest;         /**< If this flag is set and TPDO is event driven (transmission type is 0, 254 or 255),
+                                   	   	   	   	   	   	   	   	   	   	   	   then PDO will be sent by CO_TPDO_process(). */
 #if (((CO_CONFIG_PDO)&CO_CONFIG_PDO_SYNC_ENABLE) != 0) || defined CO_DOXYGEN
-    CO_SYNC_t* SYNC;        /**< From CO_TPDO_init() */
-    uint8_t syncStartValue; /**< Copy of the variable from object dictionary */
-    uint8_t syncCounter;    /**< SYNC counter used for PDO sending */
+    CO_SYNC_t* 		SYNC;        	/**< From CO_TPDO_init() */
+    uint8_t 		syncStartValue; /**< Copy of the variable from object dictionary */
+    uint8_t 		syncCounter;    /**< SYNC counter used for PDO sending */
 #endif
 #if (((CO_CONFIG_PDO)&CO_CONFIG_TPDO_TIMERS_ENABLE) != 0) || defined CO_DOXYGEN
     uint32_t inhibitTime_us; /**< Inhibit time from object dictionary translated to microseconds */
@@ -323,20 +331,28 @@ typedef struct {
  * @param SYNC SYNC object, may be NULL.
  * @param preDefinedCanId CAN identifier from pre-defined connection set, including node-id for first four PDOs, or 0
  * otherwise, see @ref CO_PDO_CAN_ID
- * @param OD_18xx_TPDOCommPar OD entry for 0x1800+ - "TPDO communication parameter", entry is required.
- * @param OD_1Axx_TPDOMapPar OD entry for 0x1A00+ - "TPDO mapping parameter", entry is required.
+ * @param OD_18xx_TPDOCommPar OD entry for 0x1800+ - "TPDO communication parameter"	, entry is required.
+ * @param OD_1Axx_TPDOMapPar  OD entry for 0x1A00+ - "TPDO mapping parameter"		, entry is required.
  * @param CANdevTx CAN device used for PDO transmission.
  * @param CANdevTxIdx Index of transmit buffer in the above CAN device.
  * @param [out] errInfo Additional information in case of error, may be NULL.
  *
  * @return #CO_ReturnError_t CO_ERROR_NO on success.
  */
-CO_ReturnError_t CO_TPDO_init(CO_TPDO_t* TPDO, OD_t* OD, CO_EM_t* em,
+CO_ReturnError_t
+CO_TPDO_init (	CO_TPDO_t* TPDO,
+				OD_t* OD,
+				CO_EM_t* em,
 #if (((CO_CONFIG_PDO)&CO_CONFIG_PDO_SYNC_ENABLE) != 0) || defined CO_DOXYGEN
-                              CO_SYNC_t* SYNC,
+                CO_SYNC_t* SYNC,
 #endif
-                              uint16_t preDefinedCanId, OD_entry_t* OD_18xx_TPDOCommPar, OD_entry_t* OD_1Axx_TPDOMapPar,
-                              CO_CANmodule_t* CANdevTx, uint16_t CANdevTxIdx, uint32_t* errInfo);
+                uint16_t preDefinedCanId,
+				OD_entry_t* OD_18xx_TPDOCommPar,
+				OD_entry_t* OD_1Axx_TPDOMapPar,
+                CO_CANmodule_t* CANdevTx,
+				uint16_t CANdevTxIdx,
+				uint32_t* errInfo
+				);
 
 /**
  * Request transmission of TPDO message.
@@ -347,10 +363,9 @@ CO_ReturnError_t CO_TPDO_init(CO_TPDO_t* TPDO, OD_t* OD, CO_EM_t* em,
  * @param TPDO TPDO object.
  */
 static inline void
-CO_TPDOsendRequest(CO_TPDO_t* TPDO) {
-    if (TPDO != NULL) {
-        TPDO->sendRequest = true;
-    }
+CO_TPDOsendRequest(CO_TPDO_t* TPDO)
+{
+    if (TPDO != NULL) {TPDO->sendRequest = true; }
 }
 
 /**

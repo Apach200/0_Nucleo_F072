@@ -87,15 +87,16 @@ extern "C" {
 /**
  * LEDs object, initialized by CO_LEDs_init()
  */
-typedef struct {
-    uint32_t LEDtmr50ms;   /**< 50ms led timer */
-    uint8_t LEDtmr200ms;   /**< 200ms led timer */
-    uint8_t LEDtmrflash_1; /**< single flash led timer */
-    uint8_t LEDtmrflash_2; /**< double flash led timer */
-    uint8_t LEDtmrflash_3; /**< triple flash led timer */
-    uint8_t LEDtmrflash_4; /**< quadruple flash led timer */
-    uint8_t LEDred;        /**< red led bitfield, to be combined with @ref CO_LED_bitmasks */
-    uint8_t LEDgreen;      /**< green led bitfield, to be combined with @ref CO_LED_bitmasks */
+typedef struct
+{
+    uint32_t LEDtmr50ms;    /**< 50ms led timer */
+     uint8_t LEDtmr200ms;   /**< 200ms led timer */
+     uint8_t LEDtmrflash_1; /**< single flash led timer */
+     uint8_t LEDtmrflash_2; /**< double flash led timer */
+     uint8_t LEDtmrflash_3; /**< triple flash led timer */
+     uint8_t LEDtmrflash_4; /**< quadruple flash led timer */
+     uint8_t LEDred;        /**< red led bitfield,   to be combined with @ref CO_LED_bitmasks */
+     uint8_t LEDgreen;      /**< green led bitfield, to be combined with @ref CO_LED_bitmasks */
 } CO_LEDs_t;
 
 /**
