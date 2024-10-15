@@ -55,9 +55,10 @@ uint8_t Length_of_Ext_Var=0;
 
 CAN_TxHeaderTypeDef Tx_Header;
 uint32_t            TxMailbox;
-uint32_t            tmp32u   = 0x0e0f0a0b;
-uint64_t            tmp64u_0 = 0x0e1f1a1b56789a;
-uint64_t            tmp64u_1 = 0x0e1f1a1b56789a;
+uint32_t            tmp32u_1   = 0x1e1f1a1b;
+uint32_t            tmp32u_0   = 0x0e0f0a0b;
+uint64_t            tmp64u_0   = 0x0e1f1a1b56789a;
+uint64_t            tmp64u_1   = 0x0e1f1a1b56789a;
 uint32_t            Ticks;
 char String_0[]={"String_for_Test_UART"};
 
@@ -280,7 +281,7 @@ int main(void)
   canOpenNodeSTM32.CANHandle = &hcan;
   canOpenNodeSTM32.HWInitFunction = MX_CAN_Init;
   canOpenNodeSTM32.timerHandle = &htim17;
-  canOpenNodeSTM32.desiredNodeID = 24;			///72;
+  canOpenNodeSTM32.desiredNodeID = 0x48;			///72;	// = 0x21;
   canOpenNodeSTM32.baudrate = 125*4;
   canopen_app_init(&canOpenNodeSTM32);
   /* USER CODE END 2 */
@@ -291,10 +292,10 @@ int main(void)
 	  read_SDO (
 			    canOpenNodeSTM32.canOpenStack->SDOclient,
 			  	103,										//remote desiredNodeID
-				0x6000,										//Index_of_OD_variable_at_remote_NodeID
+				0x6047,										//Index_of_OD_variable_at_remote_NodeID
 				0,											//Sub_Index_of_OD_variable
 				Rx_Array,									//Saved_Received_Data
-				8,											//Number_of_Byte_to_read
+				4,											//Number_of_Byte_to_read
 				(size_t*)&Length_of_Ext_Var );
 
 	  HAL_Delay(100);
@@ -307,10 +308,10 @@ int main(void)
 	  write_SDO(
 			    canOpenNodeSTM32.canOpenStack->SDOclient,
 			  	103,										//remote desiredNodeID
-				0x6000,										//Index_of_OD_variable_at_remote_NodeID
+				0x6047,										//Index_of_OD_variable_at_remote_NodeID
 				0,											//Sub_Index_of_OD_variable
 				Array_8u,									//
-				8);
+				4);
 
 	  HAL_Delay(100);
 
@@ -318,10 +319,10 @@ int main(void)
 	  read_SDO (
 			    canOpenNodeSTM32.canOpenStack->SDOclient,
 			  	103,										//remote desiredNodeID
-				0x6000,										//Index_of_OD_variable_at_remote_NodeID
+				0x6047,										//Index_of_OD_variable_at_remote_NodeID
 				0,											//Sub_Index_of_OD_variable
 				Rx_Array,									//Saved_Received_Data
-				8,											//Number_of_Byte_to_read
+				4,											//Number_of_Byte_to_read
 				(size_t*)&Length_of_Ext_Var );
 
 	  HAL_Delay(100);
@@ -339,31 +340,28 @@ int main(void)
 
 	canopen_app_process();
 
-//	if(tmp32u != OD_PERSIST_COMM.x6001_nucleo_TX_6001)
+//	if(tmp32u_1 != OD_PERSIST_COMM.x6001_nucleo_VAR32_6001)
 //		{
-//		tmp32u = OD_PERSIST_COMM.x6001_nucleo_TX_6001;
+//		tmp32u_1 = OD_PERSIST_COMM.x6001_nucleo_VAR32_6001;
 //		huart2.gState = HAL_UART_STATE_READY;
-//		HAL_UART_Transmit_DMA( &huart2, (uint8_t*)(&tmp32u), 4);
-//		HAL_UART_Transmit_DMA( &huart2, (uint8_t*)( Ticks ), 4);
+//		HAL_UART_Transmit_DMA( &huart2, (uint8_t*)(&tmp32u_1), 4);
+//		//HAL_UART_Transmit_DMA( &huart2, (uint8_t*)( Ticks ), 4);
 //		}
 
-
-	  if(HAL_GetTick() - Ticks>850)
+	  if(HAL_GetTick() - Ticks>749)
 	  {
-		OD_PERSIST_COMM.x6000_nucleo_TX_6000++;
-		tmp64u_1 = OD_PERSIST_COMM.x6000_nucleo_TX_6000;
-
-		OD_set_f64(
-					OD_find(OD, 0x6000),
-					0,
-					tmp64u_1,
-					0);
-
-		CO_TPDOsendRequest(canOpenNodeSTM32.canOpenStack->TPDO );
-
 		Ticks = HAL_GetTick();
+
+		OD_PERSIST_COMM.x6000_nucleo_VAR32_6000++;
+		tmp32u_0 = OD_PERSIST_COMM.x6000_nucleo_VAR32_6000;
+//		OD_set_f32(
+//					OD_find(OD, 0x6000),
+//					0,
+//					tmp32u_0,
+//					0);
+		CO_TPDOsendRequest(&canOpenNodeSTM32.canOpenStack->TPDO[0] );
 		huart2.gState = HAL_UART_STATE_READY;
-		HAL_UART_Transmit_DMA( &huart2, (uint8_t*)( &tmp64u_1 ), 8);
+		HAL_UART_Transmit_DMA( &huart2, (uint8_t*)( &tmp32u_0 ), 4);
 	  }
 
 
