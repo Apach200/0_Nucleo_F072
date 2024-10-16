@@ -644,9 +644,7 @@ extern "C" {
  * - CO_CONFIG_GTW_ASCII_PRINT_LEDS - Display "red" and "green" CANopen status
  *   LED diodes on terminal.
  */
-#ifdef CO_DOXYGEN
-#define CO_CONFIG_GTW (0)
-#endif
+
 #define CO_CONFIG_GTW_MULTI_NET        0x01
 #define CO_CONFIG_GTW_ASCII            0x02
 #define CO_CONFIG_GTW_ASCII_SDO        0x04
@@ -657,6 +655,11 @@ extern "C" {
 #define CO_CONFIG_GTW_ASCII_PRINT_HELP 0x80
 #define CO_CONFIG_GTW_ASCII_PRINT_LEDS 0x100
 
+#ifdef CO_DOXYGEN
+#define CO_CONFIG_GTW (CO_CONFIG_GTW_ASCII)
+#endif
+
+
 /**
  * Number of loops of #CO_SDOclientDownload() in case of block download
  *
@@ -664,9 +667,9 @@ extern "C" {
  * messages, then #CO_SDOclientDownload() functionion can be called multiple
  * times within own loop (up to 127). This can speed-up SDO block transfer.
  */
-#ifdef CO_DOXYGEN
+//#ifdef CO_DOXYGEN
 #define CO_CONFIG_GTW_BLOCK_DL_LOOP 1
-#endif
+//#endif
 
 /**
  * Size of command buffer in ASCII gateway object.
@@ -674,9 +677,9 @@ extern "C" {
  * If large amount of data is transferred (block transfer), then this should be
  * increased to 1000 or more. Buffer may be refilled between the block transfer.
  */
-#ifdef CO_DOXYGEN
+//#ifdef CO_DOXYGEN
 #define CO_CONFIG_GTWA_COMM_BUF_SIZE 200
-#endif
+//#endif
 
 /**
  * Size of message log buffer in ASCII gateway object.
@@ -735,7 +738,7 @@ extern "C" {
 //#define CO_CONFIG_FIFO (1)
 //#endif
 
-#define CO_CONFIG_FIFO (1)
+#define CO_CONFIG_FIFO (CO_CONFIG_FIFO_ENABLE|CO_CONFIG_FIFO_ASCII_COMMANDS|CO_CONFIG_FIFO_ASCII_DATATYPES)
 
 #define CO_CONFIG_FIFO_ENABLE          0x01
 #define CO_CONFIG_FIFO_ALT_READ        0x02

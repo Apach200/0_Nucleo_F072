@@ -65,8 +65,8 @@ extern "C" {
  * CANopen network, which is able to configure other CANopen nodes. It is also possible to establish individual SDO
  * client-server communication channels between devices.
  *
- * SDO client is used in CANopenNode from CO_gateway_ascii.c with default SDO CAN identifiers. There is quite advanced
- * usage in non-blocking function.
+ * SDO client is used in CANopenNode from CO_gateway_ascii.c with default SDO CAN identifiers.
+ * There is quite advanced usage in non-blocking function.
  *
  * If enabled, SDO client is initialized in CANopen.c file with @ref CO_SDOclient_init() function.
  *
@@ -160,9 +160,9 @@ write_SDO(CO_SDOclient_t* SDO_C, uint8_t nodeId, uint16_t index, uint8_t subInde
 typedef struct
 {
 #if ((CO_CONFIG_SDO_CLI&CO_CONFIG_SDO_CLI_LOCAL) != 0) || defined CO_DOXYGEN
-    OD_t* OD;       /**< From CO_SDOclient_init() */
-    uint8_t nodeId; /**< From CO_SDOclient_init() */
-    OD_IO_t OD_IO;  /**< Object dictionary interface for locally transferred object */
+    OD_t* 	OD;       	/**< From CO_SDOclient_init() */
+    uint8_t nodeId; 	/**< From CO_SDOclient_init() */
+    OD_IO_t OD_IO;  	/**< Object dictionary interface for locally transferred object */
 #endif
     CO_CANmodule_t* CANdevRx; 			/**< From CO_SDOclient_init() */
     uint16_t 		CANdevRxIdx;     	/**< From CO_SDOclient_init() */
@@ -175,43 +175,47 @@ typedef struct
                                            - Bit 0...10: 11-bit CAN identifier.
                                            - Bit 11..30: reserved, must be 0.
                                            - Bit 31: if 1, SDO client object is not used. */
-    uint32_t COB_IDServerToClient;    /**< Copy of CANopen COB_ID Server -> Client, similar as above */
-    OD_extension_t OD_1280_extension; /**< Extension for OD object */
+
+    uint32_t 		COB_IDServerToClient;    /**< Copy of CANopen COB_ID Server -> Client, similar as above */
+    OD_extension_t 	OD_1280_extension; 		/**< Extension for OD object */
 #endif
-    uint8_t nodeIDOfTheSDOServer;  /**< Node-ID of the SDO server */
-    bool_t valid;                  /**<  If true, SDO channel is valid */
-    uint16_t index;                /**< Index of current object in Object Dictionary */
-    uint8_t subIndex;              /**< Subindex of current object in Object Dictionary */
-    bool_t finished;               /**< If true, then data transfer is finished */
-    size_t sizeInd;                /**< Size of data, which will be transferred. It is optionally indicated by client
-                                      in case of download or by server in case of upload. */
-    size_t sizeTran;               /**< Size of data which is actually transferred. */
-    volatile CO_SDO_state_t state; /**< Internal state of the SDO client */
-    uint32_t SDOtimeoutTime_us;    /**< Maximum timeout time between request and response in microseconds */
-    uint32_t timeoutTimer;         /**< Timeout timer for SDO communication */
-    CO_fifo_t bufFifo;             /**< CO_fifo_t object for data buffer (not pointer) */
-    uint8_t buf[CO_CONFIG_SDO_CLI_BUFFER_SIZE + 1U]; /**< Data buffer of usable size @ref CO_CONFIG_SDO_CLI_BUFFER_SIZE,
+    uint8_t 	nodeIDOfTheSDOServer;  	/**< Node-ID of the SDO server */
+    bool_t 		valid;                  /**<  If true, SDO channel is valid */
+    uint16_t 	index;                	/**< Index of current object in Object Dictionary */
+    uint8_t 	subIndex;              	/**< Subindex of current object in Object Dictionary */
+    bool_t 		finished;               /**< If true, then data transfer is finished */
+    size_t 		sizeInd;                /**< Size of data, which will be transferred.
+                                      	  	  It is optionally indicated by client in case of download or by server in case of upload. */
+    size_t 		sizeTran;               /**< Size of data which is actually transferred. */
+    volatile CO_SDO_state_t state; 		/**< Internal state of the SDO client */
+    uint32_t 	SDOtimeoutTime_us;    	/**< Maximum timeout time between request and response in microseconds */
+    uint32_t 	timeoutTimer;         	/**< Timeout timer for SDO communication */
+    CO_fifo_t 	bufFifo;             	/**< CO_fifo_t object for data buffer (not pointer) */
+    uint8_t 	buf[CO_CONFIG_SDO_CLI_BUFFER_SIZE + 1U]; /**< Data buffer of usable size @ref CO_CONFIG_SDO_CLI_BUFFER_SIZE,
                                                         used inside bufFifo. Must be one byte larger for fifo usage. */
-    volatile void* CANrxNew; /**< Indicates, if new SDO message received from CAN bus. It is not cleared, until received
-                                message is completely processed. */
-    uint8_t CANrxData[8];    /**< 8 data bytes of the received message */
+    volatile void* CANrxNew; 			/**< Indicates, if new SDO message received from CAN bus.
+                                			 It is not cleared, until received	message is completely processed. */
+    uint8_t 	CANrxData[8];    		/**< 8 data bytes of the received message */
+
 #if ((CO_CONFIG_SDO_CLI&CO_CONFIG_FLAG_CALLBACK_PRE) != 0) || defined CO_DOXYGEN
-    void (*pFunctSignal)(void* object); /**< From CO_SDOclient_initCallbackPre() or NULL */
-    void* functSignalObject;            /**< From CO_SDOclient_initCallbackPre() or NULL */
+    void 		(*pFunctSignal)(void* object); 	/**< From CO_SDOclient_initCallbackPre() or NULL */
+    void* 		functSignalObject;            	/**< From CO_SDOclient_initCallbackPre() or NULL */
 #endif
+
 #if ((CO_CONFIG_SDO_CLI&CO_CONFIG_SDO_CLI_SEGMENTED) != 0) || defined CO_DOXYGEN
-    uint8_t toggle; /**< Toggle bit toggled in each segment in segmented transfer */
+    uint8_t 	toggle; /**< Toggle bit toggled in each segment in segmented transfer */
 #endif
 #if ((CO_CONFIG_SDO_CLI&CO_CONFIG_SDO_CLI_BLOCK) != 0) || defined CO_DOXYGEN
-    uint32_t block_SDOtimeoutTime_us; /**< Timeout time for SDO sub-block upload, half of #SDOtimeoutTime_us */
-    uint32_t block_timeoutTimer;      /**< Timeout timer for SDO sub-block upload */
-    uint8_t block_seqno;              /**< Sequence number of segment in block, 1..127 */
-    uint8_t block_blksize;            /**< Number of segments per block, 1..127 */
-    uint8_t block_noData;             /**< Number of bytes in last segment that do not contain data */
-    bool_t block_crcEnabled;          /**< Server CRC support in block transfer */
-    uint8_t block_dataUploadLast[7];  /**< Last 7 bytes of data at block upload */
-    uint16_t block_crc;               /**< Calculated CRC checksum */
+    uint32_t 	block_SDOtimeoutTime_us; 	/**< Timeout time for SDO sub-block upload, half of #SDOtimeoutTime_us */
+    uint32_t 	block_timeoutTimer;      	/**< Timeout timer for SDO sub-block upload */
+    uint8_t 	block_seqno;              	/**< Sequence number of segment in block, 1..127 */
+    uint8_t 	block_blksize;            	/**< Number of segments per block, 1..127 */
+    uint8_t 	block_noData;             	/**< Number of bytes in last segment that do not contain data */
+    bool_t 		block_crcEnabled;          	/**< Server CRC support in block transfer */
+    uint8_t 	block_dataUploadLast[7];  	/**< Last 7 bytes of data at block upload */
+    uint16_t 	block_crc;               	/**< Calculated CRC checksum */
 #endif
+
 } CO_SDOclient_t;
 
 /**

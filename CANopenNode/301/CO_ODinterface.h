@@ -106,7 +106,8 @@ typedef enum {
 /**
  * Attributes (bit masks) for OD sub-object.
  */
-typedef enum {
+typedef enum
+{
     ODA_SDO_R = 0x01U,  /**< SDO server may read from the variable */
     ODA_SDO_W = 0x02U,  /**< SDO server may write to the variable */
     ODA_SDO_RW = 0x03U, /**< SDO server may read from or write to the variable */
@@ -161,50 +162,56 @@ typedef enum {
 /**
  * IO stream structure, used for read/write access to OD variable, part of @ref OD_IO_t.
  */
-typedef struct {
-    void* dataOrig; /**< Pointer to original data object, defined by Object Dictionary. Default read/write functions
-                     * operate on it. If memory for data object is not specified by Object Dictionary, then dataOrig is
-                     * NULL. */
-    void* object; /**< Pointer to object, passed by @ref OD_extension_init(). Can be used inside read / write functions
-                   * from IO   extension. */
-    OD_size_t dataLength; /**< Data length in bytes or 0, if length is not specified */
-    OD_size_t dataOffset; /**< In case of large data, dataOffset indicates position of already transferred data */
-    OD_attr_t attribute;  /**< Attribute bit-field of the OD sub-object, see @ref OD_attributes_t */
-    uint16_t index;       /**< Index of the OD object, informative */
-    uint8_t subIndex;     /**< Sub index of the OD sub-object, informative */
+typedef struct
+{
+    void* dataOrig; /**< Pointer to original data object, defined by Object Dictionary.
+    						Default read/write functions operate on it.
+                     *	If memory for data object is not specified by Object Dictionary, then dataOrig is NULL. */
+
+    void* object; /**< Pointer to object, passed by @ref OD_extension_init().
+    					Can be used inside read / write functions from IO   extension. */
+
+    OD_size_t 	dataLength; 	/**< Data length in bytes or 0, if length is not specified 								*/
+    OD_size_t 	dataOffset; 	/**< In case of large data, dataOffset indicates position of already transferred data 	*/
+    OD_attr_t 	attribute;  	/**< Attribute bit-field of the OD sub-object, see @ref OD_attributes_t 				*/
+    uint16_t 	index;       	/**< Index of the OD object, informative 												*/
+    uint8_t 	subIndex;    	/**< Sub index of the OD sub-object, informative 										*/
 } OD_stream_t;
 
 /**
  * Structure for input / output on the OD variable. It is initialized with @ref OD_getSub() function. Access principle
  * to OD variable is via read/write functions operating on stream, similar as standard read/write.
  */
-typedef struct {
+typedef struct
+{
     /** Object Dictionary stream object, passed to read or write */
     OD_stream_t stream;
     /**
-     * Function pointer for reading value from specified variable from Object Dictionary. If OD variable is larger than
-     * buf, then this function must be called several times. After completed successful read function returns 'ODR_OK'.
-     * If read is partial, it returns 'ODR_PARTIAL'. In case of errors function returns code similar to SDO abort code.
+     * Function pointer for reading value from specified variable from Object Dictionary.
+     * If OD variable is larger than buf, then this function must be called several times.
+     * After completed successful read function returns 'ODR_OK'.
+     * If read is partial, it returns 'ODR_PARTIAL'.
+     * In case of errors function returns code similar to SDO abort code.
      *
      * Read can be restarted with @ref OD_rwRestart() function.
      *
-     * At the moment, when Object Dictionary is initialized, every variable has assigned the same "read" function. This
-     * default function simply copies data from Object Dictionary variable. Application can bind its own "read" function
-     * for specific object. In that case application is able to calculate data for reading from own internal state at
-     * the moment of "read" function call. Own "read" function on OD object can be initialized with @ref
-     * OD_extension_init() function.
+     * At the moment, when Object Dictionary is initialized, every variable has assigned the same "read" function.
+     * This default function simply copies data from Object Dictionary variable.
+     * Application can bind its own "read" function for specific object.
+     * In that case application is able to calculate data for reading from own internal state at the moment of "read" function call.
+     * Own "read" function on OD object can be initialized with @ref OD_extension_init() function.
      *
-     * "read" function must always copy all own data to buf, except if "buf" is not large enough. ("*returnCode" must
-     * not return 'ODR_PARTIAL', if there is still space in "buf".)
+     * "read" function must always copy all own data to buf, except if "buf" is not large enough.
+     * ("*returnCode" must not return 'ODR_PARTIAL', if there is still space in "buf".)
      *
-     * @warning Do not use @ref CO_LOCK_OD() and @ref CO_UNLOCK_OD() macros inside the read() function. See also @ref
-     * CO_critical_sections.
+     * @warning Do not use @ref CO_LOCK_OD() and @ref CO_UNLOCK_OD() macros inside the read() function.
+     * See also @ref CO_critical_sections.
      *
      * @param stream Object Dictionary stream object.
      * @param buf Pointer to external buffer, where to data will be copied.
      * @param count Size of the external buffer in bytes.
-     * @param [out] countRead If return value is "ODR_OK" or "ODR_PARTIAL", then number of bytes successfully read must
-     * be returned here.
+     * @param [out] countRead If return value is "ODR_OK" or "ODR_PARTIAL",
+     * then number of bytes successfully read must be returned here.
      *
      * @return Value from @ref ODR_t, "ODR_OK" in case of success.
      */
@@ -238,62 +245,95 @@ typedef struct {
     ODR_t (*write)(OD_stream_t* stream, const void* buf, OD_size_t count, OD_size_t* countWritten);
 } OD_IO_t;
 
+
+
 /**
  * Extension of OD object, which can optionally be specified by application in initialization phase with @ref
  * OD_extension_init() function.
  */
-typedef struct {
+typedef struct
+{
     /** Object on which read and write will operate, part of @ref OD_stream_t */
     void* object;
-    /** Application specified read function pointer. If NULL, then read will be disabled. @ref OD_readOriginal can be
-     * used here to keep the original read function. For function description see @ref OD_IO_t. */
+
+
+    /** Application specified read function pointer.
+     * If NULL, then read will be disabled.
+     * @ref OD_readOriginal can be used here to keep the original read function. For function description see @ref OD_IO_t.
+     * */
     ODR_t (*read)(OD_stream_t* stream, void* buf, OD_size_t count, OD_size_t* countRead);
-    /** Application specified write function pointer. If NULL, then write will be disabled. @ref OD_writeOriginal can be
-     * used here to keep the original write function. For function description see @ref OD_IO_t. */
+
+
+    /** Application specified write function pointer. If NULL, then write will be disabled.
+     * @ref OD_writeOriginal can be used here to keep the original write function.
+     * For function description see @ref OD_IO_t. */
     ODR_t (*write)(OD_stream_t* stream, const void* buf, OD_size_t count, OD_size_t* countWritten);
+
 #if OD_FLAGS_PDO_SIZE > 0
     /** PDO flags bit-field provides one bit for each OD variable, which exist inside OD object at specific sub index.
      * If application clears that bit, and OD variable is mapped to an event driven TPDO, then TPDO will be sent.
      *
-     * @ref OD_FLAGS_PDO_SIZE can have a value from 0 to 32 bytes, which corresponds to 0 to 256 available bits. If, for
-     * example, @ref OD_FLAGS_PDO_SIZE has value 4, then OD variables with sub index up to 31 will have the TPDO
-     * requesting functionality. See also @ref OD_requestTPDO and @ref OD_TPDOtransmitted. */
+     * @ref OD_FLAGS_PDO_SIZE can have a value from 0 to 32 bytes, which corresponds to 0 to 256 available bits.
+     * If, for example, @ref OD_FLAGS_PDO_SIZE has value 4,
+     * then OD variables with sub index up to 31 will have the TPDO requesting functionality.
+     * See also @ref OD_requestTPDO and @ref OD_TPDOtransmitted. */
     uint8_t flagsPDO[OD_FLAGS_PDO_SIZE];
 #endif
+
 } OD_extension_t;
 
 /**
  * Object Dictionary entry for one OD object.
  *
- * OD entries are collected inside OD_t as array (list). Each OD entry contains basic information about OD object (index
- * and subEntriesCount), pointer to odObject with additional information about var, array or record entry and pointer to
- * extension, configurable by application.
+ * OD entries are collected inside OD_t as array (list).
+ * Each OD entry contains basic information about OD object
+ * (index and subEntriesCount),
+ * pointer to odObject with additional information about var, array or record entry
+ * and pointer to extension, configurable by application.
+ *
  */
-typedef struct {
-    uint16_t index;            /**< Object Dictionary index */
-    uint8_t subEntriesCount;   /**< Number of all sub-entries, including sub-entry at sub-index 0 */
-    uint8_t odObjectType;      /**< Type of the odObject, indicated by @ref OD_objectTypes_t enumerator. */
-    CO_PROGMEM void* odObject; /**< OD object of type indicated by odObjectType, from which @ref OD_getSub() fetches the
-                                  information */
-    OD_extension_t* extension; /**< Extension to OD, specified by application */
+typedef struct
+{
+    uint16_t 	index;				/**< Object Dictionary index */
+    uint8_t 	subEntriesCount;	/**< Number of all sub-entries, including sub-entry at sub-index 0 */
+    uint8_t		odObjectType;      	/**< Type of the odObject, indicated by @ref OD_objectTypes_t enumerator. */
+    CO_PROGMEM void* odObject; 		/**< OD object of type indicated by odObjectType,
+    									     from which @ref OD_getSub() fetches the information */
+
+    OD_extension_t* extension; 		/**< Extension to OD, specified by application */
+
 } OD_entry_t;
+
+
 
 /**
  * Object Dictionary
  */
-typedef struct {
-    uint16_t size;    /**< Number of elements in the list, without last element, which is blank */
-    OD_entry_t* list; /**< List OD entries (table of contents), ordered by index */
+typedef struct
+{
+    uint16_t 	size;	/**< Number of elements in the list, without last element, which is blank */
+    OD_entry_t* list; 	/**< List OD entries (table of contents), ordered by index                */
+
 } OD_t;
+
+
 
 /**
  * Read value from original OD location
  *
- * This function can be used inside read / write functions, specified by @ref OD_extension_init(). It reads data
- * directly from memory location specified by Object dictionary. If no IO extension is used on OD entry, then io->read
- * returned by @ref OD_getSub() equals to this function. See also @ref OD_IO_t.
+ * This function can be used inside read / write functions, specified by @ref OD_extension_init().
+ * It reads data directly from memory location specified by Object dictionary.
+ * If no IO extension is used on OD entry,
+ * then io->read returned by @ref OD_getSub() equals to this function.
+ * See also @ref OD_IO_t.
  */
-ODR_t OD_readOriginal(OD_stream_t* stream, void* buf, OD_size_t count, OD_size_t* countRead);
+ODR_t OD_readOriginal	(
+						OD_stream_t*	stream,
+						void* 			buf,
+						OD_size_t 		count,
+						OD_size_t* 		countRead );
+
+
 
 /**
  * Write value to original OD location
@@ -303,6 +343,8 @@ ODR_t OD_readOriginal(OD_stream_t* stream, void* buf, OD_size_t count, OD_size_t
  * returned by @ref OD_getSub() equals to this function. See also @ref OD_IO_t.
  */
 ODR_t OD_writeOriginal(OD_stream_t* stream, const void* buf, OD_size_t count, OD_size_t* countWritten);
+
+
 
 /**
  * Find OD entry in Object Dictionary
@@ -314,23 +356,29 @@ ODR_t OD_writeOriginal(OD_stream_t* stream, const void* buf, OD_size_t count, OD
  */
 OD_entry_t* OD_find(OD_t* od, uint16_t index);
 
+
+
 /**
- * Find sub-object with specified sub-index on OD entry returned by OD_find. Function populates io structure with
- * sub-object data.
+ * Find sub-object with specified sub-index on OD entry returned by OD_find.
+ * Function populates io structure with sub-object data.
  *
  * @warning
- * Read and write functions may be called from different threads, so critical sections in custom functions must be
- * observed, see @ref CO_critical_sections.
+ * Read and write functions may be called from different threads,
+ * so critical sections in custom functions must be observed, see @ref CO_critical_sections.
  *
  * @param entry OD entry returned by @ref OD_find().
  * @param subIndex Sub-index of the variable from the OD object.
  * @param [out] io Structure will be populated on success.
- * @param odOrig If true, then potential IO extension on entry will be ignored and access to data entry in the original
- * OD location will be returned
+ *
+ * @param odOrig If true, then potential IO extension on entry will be ignored
+ *  				and access to data entry in the originalOD location will be returned
  *
  * @return Value from @ref ODR_t, "ODR_OK" in case of success.
  */
 ODR_t OD_getSub(const OD_entry_t* entry, uint8_t subIndex, OD_IO_t* io, bool_t odOrig);
+
+
+
 
 /**
  * Return index from OD entry
@@ -340,22 +388,26 @@ ODR_t OD_getSub(const OD_entry_t* entry, uint8_t subIndex, OD_IO_t* io, bool_t o
  * @return OD index
  */
 static inline uint16_t
-OD_getIndex(const OD_entry_t* entry) {
-    return (entry != NULL) ? entry->index : 0U;
+OD_getIndex ( const OD_entry_t* entry)
+{
+	return (entry != NULL) ? entry->index : 0U;
 }
 
 /**
  * Check, if OD variable is mappable to PDO or SRDO.
  *
- * If OD variable is mappable, then it may be necessary to protect read/write access from mainline function. See @ref
- * CO_critical_sections.
+ * If OD variable is mappable, then it may be necessary to protect read/write access from mainline function.
+ * See @ref CO_critical_sections.
  *
  * @param stream Object Dictionary stream object.
  *
  * @return true, if OD variable is mappable.
  */
+
+
 static inline bool_t
-OD_mappable(OD_stream_t* stream) {
+OD_mappable(OD_stream_t* stream)
+{
     return (stream != NULL) ? ((stream->attribute & ((OD_attr_t)ODA_TRPDO | (OD_attr_t)ODA_TRSRDO)) != 0U) : false;
 }
 
@@ -368,10 +420,9 @@ OD_mappable(OD_stream_t* stream) {
  * @param stream Object Dictionary stream object.
  */
 static inline void
-OD_rwRestart(OD_stream_t* stream) {
-    if (stream != NULL) {
-        stream->dataOffset = 0U;
-    }
+OD_rwRestart(OD_stream_t* stream)
+{
+    if (stream != NULL) { stream->dataOffset = 0U; }
 }
 
 /**
@@ -384,13 +435,14 @@ OD_rwRestart(OD_stream_t* stream) {
  * @return pointer to flagsPDO
  */
 static inline uint8_t*
-OD_getFlagsPDO(OD_entry_t* entry) {
+OD_getFlagsPDO(OD_entry_t* entry)
+{
 #if OD_FLAGS_PDO_SIZE > 0
-    if ((entry != NULL) && (entry->extension != NULL)) {
-        return &entry->extension->flagsPDO[0];
-    }
+
+if ((entry != NULL) && (entry->extension != NULL)) { return &entry->extension->flagsPDO[0]; }
+
 #endif
-    return NULL;
+return NULL;
 }
 
 /**
@@ -408,13 +460,17 @@ OD_getFlagsPDO(OD_entry_t* entry) {
  * @param subIndex subIndex of the OD variable.
  */
 static inline void
-OD_requestTPDO(uint8_t* flagsPDO, uint8_t subIndex) {
+OD_requestTPDO(uint8_t* flagsPDO, uint8_t subIndex)
+{
 #if OD_FLAGS_PDO_SIZE > 0
-    if ((flagsPDO != NULL) && (subIndex < (OD_FLAGS_PDO_SIZE * 8U))) {
+
+    if ((flagsPDO != NULL) && (subIndex < (OD_FLAGS_PDO_SIZE * 8U)))
+    {
         /* clear subIndex-th bit */
         uint8_t mask = ~(1U << (subIndex & 0x07U));
         flagsPDO[subIndex >> 3] &= mask;
     }
+
 #endif
 }
 
@@ -429,17 +485,20 @@ OD_requestTPDO(uint8_t* flagsPDO, uint8_t subIndex) {
  * transmitted by other event, function also returns true.
  */
 static inline bool_t
-OD_TPDOtransmitted(uint8_t* flagsPDO, uint8_t subIndex) {
+OD_TPDOtransmitted(uint8_t* flagsPDO, uint8_t subIndex)
+{
+
 #if OD_FLAGS_PDO_SIZE > 0
-    if ((flagsPDO != NULL) && (subIndex < (OD_FLAGS_PDO_SIZE * 8U))) {
-        /* return true, if subIndex-th bit is set */
-        uint8_t mask = 1U << (subIndex & 0x07U);
-        if ((flagsPDO[subIndex >> 3] & mask) != 0U) {
-            return true;
-        }
+
+if ((flagsPDO != NULL) && (subIndex < (OD_FLAGS_PDO_SIZE * 8U)))
+	{
+     /* return true, if subIndex-th bit is set */
+     uint8_t mask = 1U << (subIndex & 0x07U);
+     if ((flagsPDO[subIndex >> 3] & mask) != 0U) { return true; }
     }
+
 #endif
-    return false;
+return false;
 }
 
 /**
@@ -479,10 +538,9 @@ uint32_t OD_getSDOabCode(ODR_t returnCode);
  * @return "ODR_OK" on success, "ODR_IDX_NOT_EXIST" if OD object doesn't exist.
  */
 static inline ODR_t
-OD_extension_init(OD_entry_t* entry, OD_extension_t* extension) {
-    if (entry == NULL) {
-        return ODR_IDX_NOT_EXIST;
-    }
+OD_extension_init(OD_entry_t* entry, OD_extension_t* extension)
+{
+    if (entry == NULL) { return ODR_IDX_NOT_EXIST;  }
     entry->extension = extension;
     return ODR_OK;
 }
@@ -506,19 +564,33 @@ OD_extension_init(OD_entry_t* entry, OD_extension_t* extension) {
  * @return Value from @ref ODR_t, "ODR_OK" in case of success. Error, if variable does not exist in object dictionary or
  * it does not have the correct length or other reason.
  */
-ODR_t OD_get_value(const OD_entry_t* entry, uint8_t subIndex, void* val, OD_size_t len, bool_t odOrig);
+ODR_t OD_get_value ( const OD_entry_t* 	entry,
+							  uint8_t 	subIndex,
+							  void* 	val,
+							  OD_size_t len,
+							  bool_t 	odOrig );
+
+
 
 /** Get int8_t variable from Object Dictionary, see @ref OD_get_value */
 static inline ODR_t
-OD_get_i8(const OD_entry_t* entry, uint8_t subIndex, int8_t* val, bool_t odOrig) {
-    return OD_get_value(entry, subIndex, val, sizeof(*val), odOrig);
+OD_get_i8 ( const OD_entry_t*	entry,
+					 uint8_t	subIndex,
+					 int8_t*	val,
+					 bool_t		odOrig )
+{
+return OD_get_value(entry, subIndex, val, sizeof(*val), odOrig);
 }
+
+
 
 /** Get int16_t variable from Object Dictionary, see @ref OD_get_value */
 static inline ODR_t
-OD_get_i16(const OD_entry_t* entry, uint8_t subIndex, int16_t* val, bool_t odOrig) {
-    return OD_get_value(entry, subIndex, val, sizeof(*val), odOrig);
+OD_get_i16(const OD_entry_t* entry, uint8_t subIndex, int16_t* val, bool_t odOrig)
+{
+return OD_get_value(entry, subIndex, val, sizeof(*val), odOrig);
 }
+
 
 /** Get int32_t variable from Object Dictionary, see @ref OD_get_value */
 static inline ODR_t
@@ -526,11 +598,14 @@ OD_get_i32(const OD_entry_t* entry, uint8_t subIndex, int32_t* val, bool_t odOri
     return OD_get_value(entry, subIndex, val, sizeof(*val), odOrig);
 }
 
+
 /** Get int64_t variable from Object Dictionary, see @ref OD_get_value */
 static inline ODR_t
 OD_get_i64(const OD_entry_t* entry, uint8_t subIndex, int64_t* val, bool_t odOrig) {
     return OD_get_value(entry, subIndex, val, sizeof(*val), odOrig);
 }
+
+
 
 /** Get uint8_t variable from Object Dictionary, see @ref OD_get_value */
 static inline ODR_t
@@ -538,11 +613,15 @@ OD_get_u8(const OD_entry_t* entry, uint8_t subIndex, uint8_t* val, bool_t odOrig
     return OD_get_value(entry, subIndex, val, sizeof(*val), odOrig);
 }
 
+
+
 /** Get uint16_t variable from Object Dictionary, see @ref OD_get_value */
 static inline ODR_t
 OD_get_u16(const OD_entry_t* entry, uint8_t subIndex, uint16_t* val, bool_t odOrig) {
     return OD_get_value(entry, subIndex, val, sizeof(*val), odOrig);
 }
+
+
 
 /** Get uint32_t variable from Object Dictionary, see @ref OD_get_value */
 static inline ODR_t
@@ -550,11 +629,15 @@ OD_get_u32(const OD_entry_t* entry, uint8_t subIndex, uint32_t* val, bool_t odOr
     return OD_get_value(entry, subIndex, val, sizeof(*val), odOrig);
 }
 
+
+
 /** Get uint64_t variable from Object Dictionary, see @ref OD_get_value */
 static inline ODR_t
 OD_get_u64(const OD_entry_t* entry, uint8_t subIndex, uint64_t* val, bool_t odOrig) {
     return OD_get_value(entry, subIndex, val, sizeof(*val), odOrig);
 }
+
+
 
 /** Get float32_t variable from Object Dictionary, see @ref OD_get_value */
 static inline ODR_t
@@ -562,11 +645,15 @@ OD_get_f32(const OD_entry_t* entry, uint8_t subIndex, float32_t* val, bool_t odO
     return OD_get_value(entry, subIndex, val, sizeof(*val), odOrig);
 }
 
+
+
 /** Get float64_t variable from Object Dictionary, see @ref OD_get_value */
 static inline ODR_t
 OD_get_f64(const OD_entry_t* entry, uint8_t subIndex, float64_t* val, bool_t odOrig) {
     return OD_get_value(entry, subIndex, val, sizeof(*val), odOrig);
 }
+
+
 
 /**
  * Set variable in Object Dictionary

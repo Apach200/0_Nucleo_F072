@@ -292,50 +292,57 @@ checkNet(CO_GTWA_t* gtwa, int32_t net, CO_GTWA_respErrorCode_t* errCode) {
 #endif
 }
 
+
 #if ((CO_CONFIG_GTW)&CO_CONFIG_GTW_ASCII_SDO) != 0
 /* data types for SDO read or write */
-static const CO_GTWA_dataType_t dataTypes[] = {
-    {(char*)"hex", 0, CO_fifo_readHex2a, CO_fifo_cpyTok2Hex}, /* hex, non-standard */
-    {(char*)"b", 1, CO_fifo_readU82a, CO_fifo_cpyTok2U8},     /* BOOLEAN */
-    {(char*)"i8", 1, CO_fifo_readI82a, CO_fifo_cpyTok2I8},    /* INTEGER8 */
-    {(char*)"i16", 2, CO_fifo_readI162a, CO_fifo_cpyTok2I16}, /* INTEGER16 */
-    {(char*)"i32", 4, CO_fifo_readI322a, CO_fifo_cpyTok2I32}, /* INTEGER32 */
-    {(char*)"i64", 8, CO_fifo_readI642a, CO_fifo_cpyTok2I64}, /* INTEGER64 */
-    {(char*)"u8", 1, CO_fifo_readU82a, CO_fifo_cpyTok2U8},    /* UNSIGNED8 */
-    {(char*)"u16", 2, CO_fifo_readU162a, CO_fifo_cpyTok2U16}, /* UNSIGNED16 */
-    {(char*)"u32", 4, CO_fifo_readU322a, CO_fifo_cpyTok2U32}, /* UNSIGNED32 */
-    {(char*)"u64", 8, CO_fifo_readU642a, CO_fifo_cpyTok2U64}, /* UNSIGNED64 */
-    {(char*)"x8", 1, CO_fifo_readX82a, CO_fifo_cpyTok2U8},    /* UNSIGNED8 */
-    {(char*)"x16", 2, CO_fifo_readX162a, CO_fifo_cpyTok2U16}, /* UNSIGNED16 */
-    {(char*)"x32", 4, CO_fifo_readX322a, CO_fifo_cpyTok2U32}, /* UNSIGNED32 */
-    {(char*)"x64", 8, CO_fifo_readX642a, CO_fifo_cpyTok2U64}, /* UNSIGNED64 */
-    {(char*)"r32", 4, CO_fifo_readR322a, CO_fifo_cpyTok2R32}, /* REAL32 */
-    {(char*)"r64", 8, CO_fifo_readR642a, CO_fifo_cpyTok2R64}, /* REAL64 */
-    {(char*)"vs", 0, CO_fifo_readVs2a, CO_fifo_cpyTok2Vs},    /* VISIBLE_STRING */
-    {(char*)"os", 0, CO_fifo_readB642a, CO_fifo_cpyTok2B64},  /* OCTET_STRING base64 */
-    {(char*)"us", 0, CO_fifo_readB642a, CO_fifo_cpyTok2B64},  /* UNICODE_STRING base64 */
-    {(char*)"d", 0, CO_fifo_readB642a, CO_fifo_cpyTok2B64}    /* DOMAIN - base64 */
+static const CO_GTWA_dataType_t dataTypes[] =
+{
+    {(char*)"hex",	0, CO_fifo_readHex2a, 	CO_fifo_cpyTok2Hex	},	/* hex, non-standard */
+    {(char*)"b",	1, CO_fifo_readU82a, 	CO_fifo_cpyTok2U8	},	/* BOOLEAN */
+    {(char*)"i8",	1, CO_fifo_readI82a, 	CO_fifo_cpyTok2I8	},	/* INTEGER8 */
+    {(char*)"i16", 	2, CO_fifo_readI162a, 	CO_fifo_cpyTok2I16	}, 	/* INTEGER16 */
+    {(char*)"i32", 	4, CO_fifo_readI322a, 	CO_fifo_cpyTok2I32	}, 	/* INTEGER32 */
+    {(char*)"i64", 	8, CO_fifo_readI642a, 	CO_fifo_cpyTok2I64	}, 	/* INTEGER64 */
+    {(char*)"u8", 	1, CO_fifo_readU82a, 	CO_fifo_cpyTok2U8	},	/* UNSIGNED8 */
+    {(char*)"u16", 	2, CO_fifo_readU162a, 	CO_fifo_cpyTok2U16	}, 	/* UNSIGNED16 */
+    {(char*)"u32", 	4, CO_fifo_readU322a, 	CO_fifo_cpyTok2U32	}, 	/* UNSIGNED32 */
+    {(char*)"u64", 	8, CO_fifo_readU642a, 	CO_fifo_cpyTok2U64	}, 	/* UNSIGNED64 */
+    {(char*)"x8", 	1, CO_fifo_readX82a, 	CO_fifo_cpyTok2U8	},	/* UNSIGNED8 */
+    {(char*)"x16", 	2, CO_fifo_readX162a, 	CO_fifo_cpyTok2U16	}, 	/* UNSIGNED16 */
+    {(char*)"x32", 	4, CO_fifo_readX322a, 	CO_fifo_cpyTok2U32	}, 	/* UNSIGNED32 */
+    {(char*)"x64", 	8, CO_fifo_readX642a, 	CO_fifo_cpyTok2U64	}, 	/* UNSIGNED64 */
+    {(char*)"r32", 	4, CO_fifo_readR322a, 	CO_fifo_cpyTok2R32	}, 	/* REAL32 */
+    {(char*)"r64", 	8, CO_fifo_readR642a, 	CO_fifo_cpyTok2R64	}, 	/* REAL64 */
+    {(char*)"vs", 	0, CO_fifo_readVs2a, 	CO_fifo_cpyTok2Vs	},	/* VISIBLE_STRING */
+    {(char*)"os", 	0, CO_fifo_readB642a, 	CO_fifo_cpyTok2B64	},	/* OCTET_STRING base64 */
+    {(char*)"us", 	0, CO_fifo_readB642a, 	CO_fifo_cpyTok2B64	},	/* UNICODE_STRING base64 */
+    {(char*)"d", 	0, CO_fifo_readB642a, 	CO_fifo_cpyTok2B64	}	/* DOMAIN - base64 */
 };
 
 /* get data type from token */
 static const CO_GTWA_dataType_t*
-CO_GTWA_getDataType(char* token, bool_t* err) {
-    if ((token != NULL) && (*err == false)) {
+CO_GTWA_getDataType(char* token, bool_t* err)
+{
+    if ((token != NULL) && (*err == false))
+    {
         uint32_t i;
         uint32_t len = sizeof(dataTypes) / sizeof(CO_GTWA_dataType_t);
 
-        for (i = 0; i < len; i++) {
-            const CO_GTWA_dataType_t* dt = &dataTypes[i];
-            if (strcmp(token, dt->syntax) == 0) {
-                return dt;
-            }
+        for (i = 0; i < len; i++)
+        {
+        const CO_GTWA_dataType_t* dt = &dataTypes[i];
+        if (strcmp(token, dt->syntax) == 0) {return dt;}
         }
     }
-
     *err = true;
     return NULL;
 }
+
 #endif /* (CO_CONFIG_GTW) & CO_CONFIG_GTW_ASCII_SDO */
+
+
+
+
 
 /* transfer response buffer and verify if all bytes was read. Return true on
  * success, or false, if communication is broken. */
@@ -371,10 +378,14 @@ respBufTransfer(CO_GTWA_t* gtwa) {
 #ifndef CO_CONFIG_GTW_ASCII_ERROR_DESC_STRINGS
 #define CO_CONFIG_GTW_ASCII_ERROR_DESC_STRINGS
 
-typedef struct {
+
+typedef struct
+{
     const uint32_t code;
     const char* desc;
+
 } errorDescs_t;
+
 
 static const errorDescs_t errorDescs[] = {{100, "Request not supported."},
                                           {101, "Syntax error."},
@@ -441,59 +452,84 @@ static const errorDescs_t errorDescsSDO[] = {
 #endif /* CO_CONFIG_GTW_ASCII_ERROR_DESC_STRINGS */
 
 static void
-responseWithError(CO_GTWA_t* gtwa, CO_GTWA_respErrorCode_t respErrorCode) {
+responseWithError(CO_GTWA_t* gtwa, CO_GTWA_respErrorCode_t respErrorCode)
+{
     uint32_t i;
     uint32_t len = sizeof(errorDescs) / sizeof(errorDescs_t);
     const char* desc = "-";
 
-    for (i = 0; i < len; i++) {
+    for (i = 0; i < len; i++)
+    {
         const errorDescs_t* ed = &errorDescs[i];
-        if ((CO_GTWA_respErrorCode_t)ed->code == respErrorCode) {
-            desc = ed->desc;
-        }
+        if ((CO_GTWA_respErrorCode_t)ed->code == respErrorCode) { desc = ed->desc;}
+
     }
 
-    gtwa->respBufCount = (size_t)snprintf(gtwa->respBuf, CO_GTWA_RESP_BUF_SIZE, "[%" PRId32 "] ERROR:%d #%s\r\n",
-                                          (int32_t)gtwa->sequence, (int32_t)respErrorCode, desc);
+    gtwa->respBufCount = (size_t)snprintf (	gtwa->respBuf,
+    										CO_GTWA_RESP_BUF_SIZE,
+											"[%" PRId32 "] ERROR:%d #%s\r\n",
+                                          (int32_t)gtwa->sequence,
+										  (int32_t)respErrorCode,
+										  desc);
     (void)respBufTransfer(gtwa);
 }
 
+
+
+
 #if ((CO_CONFIG_GTW)&CO_CONFIG_GTW_ASCII_SDO) != 0
 static void
-responseWithErrorSDO(CO_GTWA_t* gtwa, CO_SDO_abortCode_t abortCode, bool_t postponed) {
+responseWithErrorSDO (	CO_GTWA_t* gtwa,
+						CO_SDO_abortCode_t abortCode,
+						bool_t postponed)
+{
     uint32_t i;
     uint32_t len = sizeof(errorDescsSDO) / sizeof(errorDescs_t);
     const char* desc = "-";
 
-    for (i = 0; i < len; i++) {
-        const errorDescs_t* ed = &errorDescsSDO[i];
-        if ((CO_SDO_abortCode_t)ed->code == abortCode) {
-            desc = ed->desc;
-        }
+    for (i = 0; i < len; i++)
+    {
+      const errorDescs_t* ed = &errorDescsSDO[i];
+      if ((CO_SDO_abortCode_t)ed->code == abortCode) { desc = ed->desc; }
     }
 
-    if (!postponed) {
-        gtwa->respBufCount = (size_t)snprintf(gtwa->respBuf, CO_GTWA_RESP_BUF_SIZE,
-                                              "[%" PRId32 "] ERROR:0x%08X #%s\r\n", (int32_t)gtwa->sequence,
-                                              (uint32_t)abortCode, desc);
+    if (!postponed)
+    {
+        gtwa->respBufCount = (size_t)snprintf( gtwa->respBuf, CO_GTWA_RESP_BUF_SIZE,
+                                               "[%" PRId32 "] ERROR:0x%08X #%s\r\n",
+											   (int32_t)gtwa->sequence,
+                                               (uint32_t)abortCode,
+											   desc);
     } else {
-        gtwa->respBufCount = (size_t)snprintf(gtwa->respBuf, CO_GTWA_RESP_BUF_SIZE, "\n...ERROR:0x%08X #%s\r\n",
-                                              (uint32_t)abortCode, desc);
-    }
+            gtwa->respBufCount = (size_t)snprintf ( gtwa->respBuf,
+            										CO_GTWA_RESP_BUF_SIZE,
+													"\n...ERROR:0x%08X #%s\r\n",
+													(uint32_t)abortCode,
+													desc);
+    	   }
 
     (void)respBufTransfer(gtwa);
 }
 #endif /* (CO_CONFIG_GTW) & CO_CONFIG_GTW_ASCII_SDO */
 
+
+
+
 #else /* (CO_CONFIG_GTW) & CO_CONFIG_GTW_ASCII_ERROR_DESC */
 static inline void
-responseWithError(CO_GTWA_t* gtwa, CO_GTWA_respErrorCode_t respErrorCode) {
-    gtwa->respBufCount = (size_t)snprintf(gtwa->respBuf, CO_GTWA_RESP_BUF_SIZE, "[%" PRId32 "] ERROR:%d\r\n",
-                                          gtwa->sequence, respErrorCode);
+responseWithError(CO_GTWA_t* gtwa, CO_GTWA_respErrorCode_t respErrorCode)
+{
+    gtwa->respBufCount = (size_t)snprintf (	gtwa->respBuf,
+    										CO_GTWA_RESP_BUF_SIZE,
+											"[%" PRId32 "] ERROR:%d\r\n",
+											gtwa->sequence,
+											respErrorCode);
     (void)respBufTransfer(gtwa);
 }
 
+
 #if ((CO_CONFIG_GTW)&CO_CONFIG_GTW_ASCII_SDO) != 0
+
 static inline void
 responseWithErrorSDO(CO_GTWA_t* gtwa, CO_SDO_abortCode_t abortCode, bool_t postponed) {
     if (!postponed) {

@@ -32,10 +32,10 @@ extern "C" {
 
 /* Stack configuration default global values. For more information see file CO_config.h. */
 #ifndef CO_CONFIG_GLOBAL_FLAG_CALLBACK_PRE
-#define CO_CONFIG_GLOBAL_FLAG_CALLBACK_PRE (0)
+#define CO_CONFIG_GLOBAL_FLAG_CALLBACK_PRE (1)
 #endif
 #ifndef CO_CONFIG_GLOBAL_RT_FLAG_CALLBACK_PRE
-#define CO_CONFIG_GLOBAL_RT_FLAG_CALLBACK_PRE (0)
+#define CO_CONFIG_GLOBAL_RT_FLAG_CALLBACK_PRE (1)
 #endif
 #ifndef CO_CONFIG_GLOBAL_FLAG_TIMERNEXT
 #define CO_CONFIG_GLOBAL_FLAG_TIMERNEXT (0)

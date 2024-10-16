@@ -31,10 +31,12 @@
 
 /* default configuration, see CO_config.h */
 #ifndef CO_CONFIG_GTW
-#define CO_CONFIG_GTW (0)
+#define CO_CONFIG_GTW (CO_CONFIG_GTW_ASCII|CO_CONFIG_GTW_ASCII_SDO|CO_CONFIG_GTW_ASCII_NMT|\
+		CO_CONFIG_GTW_ASCII_LSS|CO_CONFIG_GTW_ASCII_PRINT_LEDS|\
+		CO_CONFIG_GTW_ASCII_PRINT_HELP|CO_CONFIG_GTW_ASCII_ERROR_DESC)
 #endif
 
-#if (((CO_CONFIG_GTW)&CO_CONFIG_GTW_ASCII) != 0) || defined CO_DOXYGEN
+#if (((CO_CONFIG_GTW)&CO_CONFIG_GTW_ASCII)!= 0)||defined CO_DOXYGEN
 
 #ifdef __cplusplus
 extern "C" {
@@ -349,7 +351,8 @@ void CO_GTWA_initRead(CO_GTWA_t* gtwa,
  * @return number of available bytes
  */
 static inline size_t
-CO_GTWA_write_getSpace(CO_GTWA_t* gtwa) {
+CO_GTWA_write_getSpace(CO_GTWA_t* gtwa)
+{
     return CO_fifo_getSpace(&gtwa->commFifo);
 }
 
@@ -367,9 +370,13 @@ CO_GTWA_write_getSpace(CO_GTWA_t* gtwa) {
  * @return number of bytes actually written.
  */
 static inline size_t
-CO_GTWA_write(CO_GTWA_t* gtwa, const char* buf, size_t count) {
+CO_GTWA_write (	CO_GTWA_t* gtwa,
+				const char* buf,
+				size_t count)
+{
     return CO_fifo_write(&gtwa->commFifo, (const uint8_t*)buf, count, NULL);
 }
+
 
 #if (((CO_CONFIG_GTW)&CO_CONFIG_GTW_ASCII_LOG) != 0) || defined CO_DOXYGEN
 /**

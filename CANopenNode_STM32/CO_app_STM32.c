@@ -39,9 +39,9 @@ CANopenNodeSTM32*
 #define log_printf(macropar_message, ...) printf(macropar_message, ##__VA_ARGS__)
 
 /* default values for CO_CANopenInit() */
-#define NMT_CONTROL                                                                                                    \
-    CO_NMT_STARTUP_TO_OPERATIONAL                                                                                      \
-    | CO_NMT_ERR_ON_ERR_REG | CO_ERR_REG_GENERIC_ERR | CO_ERR_REG_COMMUNICATION
+#define	NMT_CONTROL		CO_NMT_STARTUP_TO_OPERATIONAL|CO_NMT_ERR_ON_ERR_REG|CO_ERR_REG_GENERIC_ERR|CO_ERR_REG_COMMUNICATION
+
+
 #define FIRST_HB_TIME        500
 #define SDO_SRV_TIMEOUT_TIME 1000
 #define SDO_CLI_TIMEOUT_TIME 500
@@ -75,6 +75,7 @@ canopen_app_init(CANopenNodeSTM32* _canopenNodeSTM32) {
 
     /* Allocate memory */
     CO_config_t* config_ptr = NULL;
+
 #ifdef CO_MULTIPLE_OD
     /* example usage of CO_MULTIPLE_OD (but still single OD here) */
     CO_config_t co_config = {0};
@@ -86,24 +87,33 @@ canopen_app_init(CANopenNodeSTM32* _canopenNodeSTM32) {
 
     uint32_t heapMemoryUsed;
     CO = CO_new(config_ptr, &heapMemoryUsed);
-    if (CO == NULL) {
-        log_printf("Error: Can't allocate memory\n");
-        return 1;
-    } else {
-        log_printf("Allocated %u bytes for CANopen objects\n", heapMemoryUsed);
-    }
+    if (CO == NULL)
+    {
+     log_printf("Error: Can't allocate memory\n");
+     return 1;
+
+    } else { log_printf("Allocated %u bytes for CANopen objects\n", heapMemoryUsed); }
+
+
 
     canopenNodeSTM32->canOpenStack = CO;
 
 #if (CO_CONFIG_STORAGE) & CO_CONFIG_STORAGE_ENABLE
-    err = CO_storageBlank_init(&storage, CO->CANmodule, OD_ENTRY_H1010_storeParameters,
-                               OD_ENTRY_H1011_restoreDefaultParameters, storageEntries, storageEntriesCount,
-                               &storageInitError);
 
-    if (err != CO_ERROR_NO && err != CO_ERROR_DATA_CORRUPT) {
-        log_printf("Error: Storage %d\n", storageInitError);
-        return 2;
+    err = CO_storageBlank_init ( &storage,
+    							 CO->CANmodule,
+								 OD_ENTRY_H1010_storeParameters,
+                                 OD_ENTRY_H1011_restoreDefaultParameters,
+							     storageEntries,
+							     storageEntriesCount,
+                                 &storageInitError    );
+
+    if (err != CO_ERROR_NO && err != CO_ERROR_DATA_CORRUPT)
+    {
+     log_printf("Error: Storage %d\n", storageInitError);
+     return 2;
     }
+
 #endif
 
     canopen_app_resetCommunication();
@@ -111,7 +121,8 @@ canopen_app_init(CANopenNodeSTM32* _canopenNodeSTM32) {
 }
 
 int
-canopen_app_resetCommunication() {
+canopen_app_resetCommunication()
+{
     /* CANopen communication reset - initialize CANopen objects *******************/
     log_printf("CANopenNode - Reset communication...\n");
 
@@ -124,53 +135,67 @@ canopen_app_resetCommunication() {
 
     /* initialize CANopen */
     err = CO_CANinit(CO, canopenNodeSTM32, 0); // Bitrate for STM32 microcontroller is being set in MXCube Settings
-    if (err != CO_ERROR_NO) {
-        log_printf("Error: CAN initialization failed: %d\n", err);
-        return 1;
+
+    if (err != CO_ERROR_NO)
+    {
+     log_printf("Error: CAN initialization failed: %d\n", err);
+     return 1;
     }
 
-    CO_LSS_address_t lssAddress = {.identity = {.vendorID = OD_PERSIST_COMM.x1018_identity.vendor_ID,
-                                                .productCode = OD_PERSIST_COMM.x1018_identity.productCode,
-                                                .revisionNumber = OD_PERSIST_COMM.x1018_identity.revisionNumber,
-                                                .serialNumber = OD_PERSIST_COMM.x1018_identity.serialNumber}};
+    CO_LSS_address_t lssAddress = {.identity = { .vendorID       = OD_PERSIST_COMM.x1018_identity.vendor_ID,
+                                                 .productCode    = OD_PERSIST_COMM.x1018_identity.productCode,
+                                                 .revisionNumber = OD_PERSIST_COMM.x1018_identity.revisionNumber,
+                                                 .serialNumber   = OD_PERSIST_COMM.x1018_identity.serialNumber   }
+    							  };
+
+
     err = CO_LSSinit(CO, &lssAddress, &canopenNodeSTM32->desiredNodeID, &canopenNodeSTM32->baudrate);
-    if (err != CO_ERROR_NO) {
-        log_printf("Error: LSS slave initialization failed: %d\n", err);
-        return 2;
+
+
+    if (err != CO_ERROR_NO)
+    {
+     log_printf("Error: LSS slave initialization failed: %d\n", err);
+     return 2;
     }
 
     canopenNodeSTM32->activeNodeID = canopenNodeSTM32->desiredNodeID;
     uint32_t errInfo = 0;
 
-    err = CO_CANopenInit(CO,                   /* CANopen object */
-                         NULL,                 /* alternate NMT */
-                         NULL,                 /* alternate em */
-                         OD,                   /* Object dictionary */
-                         OD_STATUS_BITS,       /* Optional OD_statusBits */
-                         NMT_CONTROL,          /* CO_NMT_control_t */
-                         FIRST_HB_TIME,        /* firstHBTime_ms */
-                         SDO_SRV_TIMEOUT_TIME, /* SDOserverTimeoutTime_ms */
-                         SDO_CLI_TIMEOUT_TIME, /* SDOclientTimeoutTime_ms */
-                         SDO_CLI_BLOCK,        /* SDOclientBlockTransfer */
+    err = CO_CANopenInit(CO,                   /* CANopen object 			*/
+                         NULL,                 /* alternate NMT				*/
+                         NULL,                 /* alternate em 				*/
+                         OD,                   /* Object dictionary 		*/
+                         OD_STATUS_BITS,       /* Optional OD_statusBits 	*/
+                         NMT_CONTROL,          /* CO_NMT_control_t 			*/
+                         FIRST_HB_TIME,        /* firstHBTime_ms 			*/
+                         SDO_SRV_TIMEOUT_TIME, /* SDOserverTimeoutTime_ms 	*/
+                         SDO_CLI_TIMEOUT_TIME, /* SDOclientTimeoutTime_ms 	*/
+                         SDO_CLI_BLOCK,        /* SDOclientBlockTransfer 	*/
                          canopenNodeSTM32->activeNodeID, &errInfo);
-    if (err != CO_ERROR_NO && err != CO_ERROR_NODE_ID_UNCONFIGURED_LSS) {
-        if (err == CO_ERROR_OD_PARAMETERS) {
-            log_printf("Error: Object Dictionary entry 0x%X\n", errInfo);
-        } else {
-            log_printf("Error: CANopen initialization failed: %d\n", err);
-        }
-        return 3;
+
+
+    if (err != CO_ERROR_NO && err != CO_ERROR_NODE_ID_UNCONFIGURED_LSS)
+    {
+      if (err == CO_ERROR_OD_PARAMETERS)
+            {
+       		        log_printf ( "Error: Object Dictionary entry 0x%X\n"     , errInfo );
+            } else {log_printf ( "Error: CANopen initialization failed: %d\n", err     ); }
+     return 3;
     }
 
-    err = CO_CANopenInitPDO(CO, CO->em, OD, canopenNodeSTM32->activeNodeID, &errInfo);
-    if (err != CO_ERROR_NO) {
-        if (err == CO_ERROR_OD_PARAMETERS) {
-            log_printf("Error: Object Dictionary entry 0x%X\n", errInfo);
-        } else {
-            log_printf("Error: PDO initialization failed: %d\n", err);
-        }
-        return 4;
-    }
+    err = CO_CANopenInitPDO(CO,
+    						CO->em,
+							OD,
+							canopenNodeSTM32->activeNodeID,
+							&errInfo);
+
+    if (err != CO_ERROR_NO)
+		{
+		if (err == CO_ERROR_OD_PARAMETERS)
+				{log_printf (     "Error: Object Dictionary entry 0x%X\n",errInfo);}
+				 else {log_printf("Error: PDO initialization failed: %d\n", err   );}
+		return 4;
+		}
 
     /* Configure Timer interrupt function for execution every 1 millisecond */
     HAL_TIM_Base_Start_IT(canopenNodeSTM32->timerHandle); //1ms interrupt
@@ -178,16 +203,20 @@ canopen_app_resetCommunication() {
     /* Configure CAN transmit and receive interrupt */
 
     /* Configure CANopen callbacks, etc */
-    if (!CO->nodeIdUnconfigured) {
+    if (!CO->nodeIdUnconfigured)
+    {
 
 #if (CO_CONFIG_STORAGE) & CO_CONFIG_STORAGE_ENABLE
-        if (storageInitError != 0) {
-            CO_errorReport(CO->em, CO_EM_NON_VOLATILE_MEMORY, CO_EMC_HARDWARE, storageInitError);
-        }
+        if (storageInitError != 0) { CO_errorReport(CO->em,
+        											CO_EM_NON_VOLATILE_MEMORY,
+													CO_EMC_HARDWARE,
+													storageInitError);
+        						   }
 #endif
-    } else {
-        log_printf("CANopenNode - Node-id not initialized\n");
-    }
+
+    } else {log_printf("CANopenNode - Node-id not initialized\n"); }
+
+
 
     /* start CAN */
     CO_CANsetNormalMode(CO->CANmodule);

@@ -959,9 +959,19 @@ CO_LSSinit(CO_t* co, CO_LSS_address_t* lssAddress, uint8_t* pendingNodeID, uint1
 #endif /* (CO_CONFIG_LSS) & CO_CONFIG_LSS_SLAVE */
 
 CO_ReturnError_t
-CO_CANopenInit(CO_t* co, CO_NMT_t* NMT, CO_EM_t* em, OD_t* od, OD_entry_t* OD_statusBits, uint16_t NMTcontrol,
-               uint16_t firstHBTime_ms, uint16_t SDOserverTimeoutTime_ms, uint16_t SDOclientTimeoutTime_ms,
-               bool_t SDOclientBlockTransfer, uint8_t nodeId, uint32_t* errInfo) {
+CO_CANopenInit (CO_t* co,
+				CO_NMT_t* NMT,
+				CO_EM_t* em,
+				OD_t* od,
+				OD_entry_t* OD_statusBits,
+				uint16_t NMTcontrol,
+				uint16_t firstHBTime_ms,
+				uint16_t SDOserverTimeoutTime_ms,
+				uint16_t SDOclientTimeoutTime_ms,
+                bool_t SDOclientBlockTransfer,
+				uint8_t nodeId,
+				uint32_t* errInfo)
+{
     (void)SDOclientTimeoutTime_ms;
     (void)SDOclientBlockTransfer;
     CO_ReturnError_t err;
@@ -970,166 +980,246 @@ CO_CANopenInit(CO_t* co, CO_NMT_t* NMT, CO_EM_t* em, OD_t* od, OD_entry_t* OD_st
     (void)OD_statusBits; /* may be unused */
 #endif
 
-    if ((co == NULL) || ((CO_GET_CNT(NMT) == 0U) && (NMT == NULL)) || ((CO_GET_CNT(EM) == 0U) && (em == NULL))) {
-        return CO_ERROR_ILLEGAL_ARGUMENT;
+    if ((co == NULL) || ((CO_GET_CNT(NMT) == 0U) && (NMT == NULL)) || ((CO_GET_CNT(EM) == 0U) && (em == NULL)))
+    {
+     return CO_ERROR_ILLEGAL_ARGUMENT;
     }
 
     /* alternatives */
-    if (CO_GET_CNT(NMT) == 0U) {
-        co->NMT = NMT;
-    }
-    if (em == NULL) {
-        em = co->em;
-    }
+    if (CO_GET_CNT(NMT) == 0U) {co->NMT = NMT; }
+
+
+    if (em == NULL) { em = co->em; }
+
+
 
     /* Verify CANopen Node-ID */
     co->nodeIdUnconfigured = false;
 #if ((CO_CONFIG_LSS)&CO_CONFIG_LSS_SLAVE) != 0
-    if ((CO_GET_CNT(LSS_SLV) == 1U) && (nodeId == CO_LSS_NODE_ID_ASSIGNMENT)) {
-        co->nodeIdUnconfigured = true;
+
+    if ((CO_GET_CNT(LSS_SLV) == 1U) && (nodeId == CO_LSS_NODE_ID_ASSIGNMENT))
+    {
+     co->nodeIdUnconfigured = true;
+
     } else
+
 #endif
-        if ((nodeId < 1U) || (nodeId > 127U)) {
+        if ((nodeId < 1U) || (nodeId > 127U))
+        {
         return CO_ERROR_ILLEGAL_ARGUMENT;
-    } else { /* MISRA C 2004 14.10 */
-    }
+        } else {} /* MISRA C 2004 14.10 */
+
 
 #if ((CO_CONFIG_LEDS)&CO_CONFIG_LEDS_ENABLE) != 0
-    if (CO_GET_CNT(LEDS) == 1U) {
-        err = CO_LEDs_init(co->LEDs);
-        if (err != CO_ERROR_NO) {
-            return err;
-        }
+
+    if (CO_GET_CNT(LEDS) == 1U)
+    {
+      err = CO_LEDs_init(co->LEDs);
+      if (err != CO_ERROR_NO) { return err; }
     }
+
 #endif
 
     /* CANopen Node ID is unconfigured, stop initialization here */
-    if (co->nodeIdUnconfigured) {
-        return CO_ERROR_NODE_ID_UNCONFIGURED_LSS;
-    }
+    if ( co->nodeIdUnconfigured ) { return CO_ERROR_NODE_ID_UNCONFIGURED_LSS; }
+
+
 
     /* Emergency */
-    if (CO_GET_CNT(EM) == 1U) {
+    if (CO_GET_CNT(EM) == 1U)
+    {
         err = CO_EM_init(co->em, co->CANmodule, OD_GET(H1001, OD_H1001_ERR_REG),
+
 #if ((CO_CONFIG_EM) & (CO_CONFIG_EM_PRODUCER | CO_CONFIG_EM_HISTORY)) != 0
-                         co->em_fifo, (CO_GET_CNT(ARR_1003) + 1U),
+        co->em_fifo, (CO_GET_CNT(ARR_1003) + 1U),
 #endif
+
 #if ((CO_CONFIG_EM)&CO_CONFIG_EM_PRODUCER) != 0
-                         OD_GET(H1014, OD_H1014_COBID_EMERGENCY), CO_GET_CO(TX_IDX_EM_PROD),
+        OD_GET(H1014, OD_H1014_COBID_EMERGENCY),
+		CO_GET_CO(TX_IDX_EM_PROD),
+
 #if ((CO_CONFIG_EM)&CO_CONFIG_EM_PROD_INHIBIT) != 0
                          OD_GET(H1015, OD_H1015_INHIBIT_TIME_EMCY),
 #endif
+
 #endif
+
 #if ((CO_CONFIG_EM)&CO_CONFIG_EM_HISTORY) != 0
-                         OD_GET(H1003, OD_H1003_PREDEF_ERR_FIELD),
+
+      OD_GET(H1003, OD_H1003_PREDEF_ERR_FIELD),
 #endif
+
 #if ((CO_CONFIG_EM)&CO_CONFIG_EM_STATUS_BITS) != 0
-                         OD_statusBits,
+      OD_statusBits,
 #endif
+
 #if ((CO_CONFIG_EM)&CO_CONFIG_EM_CONSUMER) != 0
-                         co->CANmodule, CO_GET_CO(RX_IDX_EM_CONS),
+      co->CANmodule, CO_GET_CO(RX_IDX_EM_CONS),
 #endif
-                         nodeId, errInfo);
-        if (err != CO_ERROR_NO) {
-            return err;
-        }
+      nodeId, errInfo);
+
+        if (err != CO_ERROR_NO) {  return err;  }
+
     }
+
 
     /* NMT_Heartbeat */
-    if (CO_GET_CNT(NMT) == 1U) {
-        err = CO_NMT_init(co->NMT, OD_GET(H1017, OD_H1017_PRODUCER_HB_TIME), em, nodeId, NMTcontrol, firstHBTime_ms,
-                          co->CANmodule, CO_GET_CO(RX_IDX_NMT_SLV), CO_CAN_ID_NMT_SERVICE,
+    if (CO_GET_CNT(NMT) == 1U)
+    {
+       err = CO_NMT_init (	co->NMT,
+    		   	   	   	   	OD_GET(H1017, OD_H1017_PRODUCER_HB_TIME),
+							em,
+							nodeId,
+							NMTcontrol,
+							firstHBTime_ms,
+							co->CANmodule,
+							CO_GET_CO(RX_IDX_NMT_SLV),
+							CO_CAN_ID_NMT_SERVICE,
 #if ((CO_CONFIG_NMT)&CO_CONFIG_NMT_MASTER) != 0
-                          co->CANmodule, CO_GET_CO(TX_IDX_NMT_MST), CO_CAN_ID_NMT_SERVICE,
+							co->CANmodule, CO_GET_CO(TX_IDX_NMT_MST), CO_CAN_ID_NMT_SERVICE,
 #endif
-                          co->CANmodule, CO_GET_CO(TX_IDX_HB_PROD), CO_CAN_ID_HEARTBEAT + nodeId, errInfo);
-        if (err != CO_ERROR_NO) {
-            return err;
-        }
+							co->CANmodule, CO_GET_CO(TX_IDX_HB_PROD), CO_CAN_ID_HEARTBEAT + nodeId, errInfo);
+
+        if (err != CO_ERROR_NO) { return err; }
     }
+
+
 
 #if ((CO_CONFIG_HB_CONS)&CO_CONFIG_HB_CONS_ENABLE) != 0
-    if (CO_GET_CNT(HB_CONS) == 1U) {
-        err = CO_HBconsumer_init(co->HBcons, em, co->HBconsMonitoredNodes, CO_GET_CNT(ARR_1016),
-                                 OD_GET(H1016, OD_H1016_CONSUMER_HB_TIME), co->CANmodule, CO_GET_CO(RX_IDX_HB_CONS),
-                                 errInfo);
-        if (err != CO_ERROR_NO) {
-            return err;
-        }
+
+    if (CO_GET_CNT(HB_CONS) == 1U)
+    {
+       err = CO_HBconsumer_init	( co->HBcons,
+    		   	   	   	   	   	  em,
+								  co->HBconsMonitoredNodes,
+								  CO_GET_CNT(ARR_1016),
+                                  OD_GET(H1016, OD_H1016_CONSUMER_HB_TIME),
+								  co->CANmodule,
+								  CO_GET_CO(RX_IDX_HB_CONS),
+								  errInfo
+								 );
+
+        if (err != CO_ERROR_NO) {  return err; }
     }
+
 #endif
 
+
+
+
 #if ((CO_CONFIG_NODE_GUARDING)&CO_CONFIG_NODE_GUARDING_SLAVE_ENABLE) != 0
-    err = CO_nodeGuardingSlave_init(co->NGslave, OD_GET(H100C, OD_H100C_GUARD_TIME),
-                                    OD_GET(H100D, OD_H100D_LIFETIME_FACTOR), em, CO_CAN_ID_HEARTBEAT + nodeId,
-                                    co->CANmodule, CO_GET_CO(RX_IDX_NG_SLV), co->CANmodule, CO_GET_CO(TX_IDX_NG_SLV),
-                                    errInfo);
-    if (err != CO_ERROR_NO) {
-        return err;
-    }
+
+    err = CO_nodeGuardingSlave_init(co->NGslave,
+    								OD_GET(H100C, OD_H100C_GUARD_TIME),
+                                    OD_GET(H100D, OD_H100D_LIFETIME_FACTOR),
+									em,
+									CO_CAN_ID_HEARTBEAT + nodeId,
+                                    co->CANmodule,
+									CO_GET_CO(RX_IDX_NG_SLV),
+									co->CANmodule,
+									CO_GET_CO(TX_IDX_NG_SLV),
+                                    errInfo
+									);
+
+    if (err != CO_ERROR_NO) { return err; }
+
 #endif
+
+
 #if ((CO_CONFIG_NODE_GUARDING)&CO_CONFIG_NODE_GUARDING_MASTER_ENABLE) != 0
-    err = CO_nodeGuardingMaster_init(co->NGmaster, em, co->CANmodule, CO_GET_CO(RX_IDX_NG_MST), co->CANmodule,
-                                     CO_GET_CO(TX_IDX_NG_MST));
-    if (err) {
-        return err;
-    }
+
+    err = CO_nodeGuardingMaster_init (	co->NGmaster,
+    									em,
+										co->CANmodule,
+										CO_GET_CO(RX_IDX_NG_MST),
+										co->CANmodule,
+										CO_GET_CO(TX_IDX_NG_MST)
+									 );
+    if (err) {  return err;  }
+
+
 #endif
 
     /* SDOserver */
-    if (CO_GET_CNT(SDO_SRV) > 0U) {
-        OD_entry_t* SDOsrvPar = OD_GET(H1200, OD_H1200_SDO_SERVER_1_PARAM);
-        for (uint16_t i = 0; i < CO_GET_CNT(SDO_SRV); i++) {
-            err = CO_SDOserver_init(&co->SDOserver[i], od, SDOsrvPar, nodeId, SDOserverTimeoutTime_ms, co->CANmodule,
-                                    CO_GET_CO(RX_IDX_SDO_SRV) + i, co->CANmodule, CO_GET_CO(TX_IDX_SDO_SRV) + i,
-                                    errInfo);
-            if (err != CO_ERROR_NO) {
-                return err;
-            }
-            SDOsrvPar++;
-        }
-    }
+    if (CO_GET_CNT(SDO_SRV) > 0U)
+    			{
+    				OD_entry_t* SDOsrvPar = OD_GET(H1200, OD_H1200_SDO_SERVER_1_PARAM);
+
+    				for (uint16_t i = 0; i < CO_GET_CNT(SDO_SRV); i++)
+    						{ err = CO_SDOserver_init ( &co->SDOserver[i],
+    													od,
+														SDOsrvPar,
+														nodeId,
+														SDOserverTimeoutTime_ms,
+														co->CANmodule,
+														CO_GET_CO(RX_IDX_SDO_SRV) + i,
+														co->CANmodule,
+														CO_GET_CO(TX_IDX_SDO_SRV) + i,
+														errInfo
+													  );
+
+    						if (err != CO_ERROR_NO) {  return err;  }
+    						SDOsrvPar++;
+    						}
+    			}
 
 #if ((CO_CONFIG_SDO_CLI)&CO_CONFIG_SDO_CLI_ENABLE) != 0
-    if (CO_GET_CNT(SDO_CLI) > 0U) {
-        OD_entry_t* SDOcliPar = OD_GET(H1280, OD_H1280_SDO_CLIENT_1_PARAM);
-        for (uint16_t i = 0; i < CO_GET_CNT(SDO_CLI); i++) {
-            err = CO_SDOclient_init(&co->SDOclient[i], od, SDOcliPar, nodeId, co->CANmodule,
+
+    if (CO_GET_CNT(SDO_CLI) > 0U)
+    		{
+        	OD_entry_t* SDOcliPar = OD_GET(H1280, OD_H1280_SDO_CLIENT_1_PARAM);
+        		for (uint16_t i = 0; i < CO_GET_CNT(SDO_CLI); i++)
+        				{
+        				err = CO_SDOclient_init(&co->SDOclient[i], od, SDOcliPar, nodeId, co->CANmodule,
                                     CO_GET_CO(RX_IDX_SDO_CLI) + i, co->CANmodule, CO_GET_CO(TX_IDX_SDO_CLI) + i,
                                     errInfo);
-            SDOcliPar++;
-            if (err != CO_ERROR_NO) {
-                return err;
-            }
-        }
-    }
+        				SDOcliPar++;
+        				if (err != CO_ERROR_NO) { return err; }
+        				}
+    		}
+
 #endif
 
 #if ((CO_CONFIG_TIME)&CO_CONFIG_TIME_ENABLE) != 0
-    if (CO_GET_CNT(TIME) == 1U) {
-        err = CO_TIME_init(co->TIME, OD_GET(H1012, OD_H1012_COBID_TIME), co->CANmodule, CO_GET_CO(RX_IDX_TIME),
+
+    if (CO_GET_CNT(TIME) == 1U)
+    {
+        err = CO_TIME_init ( co->TIME,
+        					 OD_GET(H1012, OD_H1012_COBID_TIME),
+							 co->CANmodule,
+							 CO_GET_CO(RX_IDX_TIME),
+
 #if ((CO_CONFIG_TIME)&CO_CONFIG_TIME_PRODUCER) != 0
                            co->CANmodule, CO_GET_CO(TX_IDX_TIME),
 #endif
                            errInfo);
-        if (err != CO_ERROR_NO) {
-            return err;
-        }
+        if (err != CO_ERROR_NO) {  return err; }
     }
+
 #endif
 
 #if ((CO_CONFIG_SYNC)&CO_CONFIG_SYNC_ENABLE) != 0
-    if (CO_GET_CNT(SYNC) == 1U) {
-        err = CO_SYNC_init(co->SYNC, em, OD_GET(H1005, OD_H1005_COBID_SYNC), OD_GET(H1006, OD_H1006_COMM_CYCL_PERIOD),
-                           OD_GET(H1007, OD_H1007_SYNC_WINDOW_LEN), OD_GET(H1019, OD_H1019_SYNC_CNT_OVERFLOW),
-                           co->CANmodule, CO_GET_CO(RX_IDX_SYNC),
+
+    if (CO_GET_CNT(SYNC) == 1U)
+    {
+        err = CO_SYNC_init ( co->SYNC,
+        					 em,
+							 OD_GET(H1005, OD_H1005_COBID_SYNC),
+							 OD_GET(H1006, OD_H1006_COMM_CYCL_PERIOD),
+                             OD_GET(H1007, OD_H1007_SYNC_WINDOW_LEN),
+							 OD_GET(H1019, OD_H1019_SYNC_CNT_OVERFLOW),
+							 co->CANmodule,
+							 CO_GET_CO(RX_IDX_SYNC),
+
 #if ((CO_CONFIG_SYNC)&CO_CONFIG_SYNC_PRODUCER) != 0
-                           co->CANmodule, CO_GET_CO(TX_IDX_SYNC),
+							 co->CANmodule,
+							 CO_GET_CO(TX_IDX_SYNC),
 #endif
-                           errInfo);
-        if (err != CO_ERROR_NO) {
-            return err;
-        }
+							 errInfo);
+
+        if (err != CO_ERROR_NO) { return err; }
+
+
     }
 #endif
 
@@ -1184,42 +1274,63 @@ CO_CANopenInit(CO_t* co, CO_NMT_t* NMT, CO_EM_t* em, OD_t* od, OD_entry_t* OD_st
 }
 
 CO_ReturnError_t
-CO_CANopenInitPDO(CO_t* co, CO_EM_t* em, OD_t* od, uint8_t nodeId, uint32_t* errInfo) {
-    if (co == NULL) {
-        return CO_ERROR_ILLEGAL_ARGUMENT;
-    }
-    if ((nodeId < 1U) || (nodeId > 127U) || co->nodeIdUnconfigured) {
-        return (co->nodeIdUnconfigured) ? CO_ERROR_NODE_ID_UNCONFIGURED_LSS : CO_ERROR_ILLEGAL_ARGUMENT;
+CO_CANopenInitPDO (	CO_t* 		co,
+					CO_EM_t* 	em,
+					OD_t* 		od,
+					uint8_t 	nodeId,
+					uint32_t* 	errInfo )
+{
+    if (co == NULL) { return CO_ERROR_ILLEGAL_ARGUMENT; }
+
+
+    if ((nodeId < 1U) || (nodeId > 127U) || co->nodeIdUnconfigured)
+    {
+     return (co->nodeIdUnconfigured) ? CO_ERROR_NODE_ID_UNCONFIGURED_LSS : CO_ERROR_ILLEGAL_ARGUMENT;
     }
 
 #if ((CO_CONFIG_PDO)&CO_CONFIG_RPDO_ENABLE) != 0
-    if (CO_GET_CNT(RPDO) > 0U) {
-        OD_entry_t* RPDOcomm = OD_GET(H1400, OD_H1400_RXPDO_1_PARAM);
-        OD_entry_t* RPDOmap = OD_GET(H1600, OD_H1600_RXPDO_1_MAPPING);
-        for (uint16_t i = 0; i < CO_GET_CNT(RPDO); i++) {
-            CO_ReturnError_t err;
-            uint16_t preDefinedCanId = 0;
-            if (i < CO_RPDO_DEFAULT_CANID_COUNT) {
+
+    if (CO_GET_CNT(RPDO) > 0U)
+    {
+     OD_entry_t* RPDOcomm 	= OD_GET(H1400, OD_H1400_RXPDO_1_PARAM  );
+     OD_entry_t* RPDOmap 	= OD_GET(H1600, OD_H1600_RXPDO_1_MAPPING);
+     for (uint16_t i = 0; i < CO_GET_CNT(RPDO); i++)
+     	 {
+    	 CO_ReturnError_t err;
+    	 uint16_t preDefinedCanId = 0;
+    	 if (i < CO_RPDO_DEFAULT_CANID_COUNT)
+    	 	 {
+
 #if CO_RPDO_DEFAULT_CANID_COUNT <= 4
-                preDefinedCanId = (uint16_t)((CO_CAN_ID_RPDO_1 + (i * 0x100U)) + nodeId);
+
+    		 preDefinedCanId = (uint16_t)((CO_CAN_ID_RPDO_1 + (i * 0x100U)) + nodeId);
 #else
-                uint16_t pdoOffset = i % 4;
-                uint16_t nodeIdOffset = i / 4;
-                preDefinedCanId = (CO_CAN_ID_RPDO_1 + pdoOffset * 0x100) + nodeId + nodeIdOffset;
+    		 uint16_t pdoOffset = i % 4;
+    		 uint16_t nodeIdOffset = i / 4;
+    		 preDefinedCanId = (CO_CAN_ID_RPDO_1 + pdoOffset * 0x100) + nodeId + nodeIdOffset;
 #endif
             }
-            err = CO_RPDO_init(&co->RPDO[i], od, em,
+            err = CO_RPDO_init (&co->RPDO[i],
+            					od,
+								em,
 #if ((CO_CONFIG_PDO)&CO_CONFIG_PDO_SYNC_ENABLE) != 0
-                               co->SYNC,
+								co->SYNC,
 #endif
-                               preDefinedCanId, RPDOcomm, RPDOmap, co->CANmodule, CO_GET_CO(RX_IDX_RPDO) + i, errInfo);
-            if (err != CO_ERROR_NO) {
-                return err;
-            }
+								preDefinedCanId,
+								RPDOcomm,
+								RPDOmap,
+								co->CANmodule,
+								CO_GET_CO(RX_IDX_RPDO) + i,
+								errInfo
+							  );
+            if (err != CO_ERROR_NO) { return err; }
+
+
             RPDOcomm++;
             RPDOmap++;
-        }
-    }
+        }/////for (uint16_t.....
+    }////////if (CO_GET_CNT(RPDO) > 0U)
+
 #endif
 
 #if ((CO_CONFIG_PDO)&CO_CONFIG_TPDO_ENABLE) != 0
